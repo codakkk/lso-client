@@ -1,36 +1,67 @@
 package com.cclcgb.lso.api;
 
-import java.io.DataInputStream;
+import java.io.StreamCorruptedException;
 
 public class LSOReader {
 
-    private final DataInputStream mBuffer;
+    private int mPosition;
+    private MessageBuffer mBuffer;
 
-    public LSOReader(DataInputStream stream) {
-        mBuffer = stream;
+    private LSOReader() {}
+
+    public static LSOReader Create(MessageBuffer buffer) {
+        LSOReader reader = new LSOReader();
+
+        reader.mBuffer = buffer;
+        reader.mPosition = 0;
+        return reader;
     }
 
-    public byte readByte() {
-        try {
-            return mBuffer.readByte();
-        } catch(Exception ignored) {
-        }
-        return 0;
+    public int getLength() {
+        return mBuffer.getCount();
     }
 
-    public short readShort() {
-        try {
-            return mBuffer.readShort();
-        } catch(Exception ignored) {
+    public byte readByte() throws StreamCorruptedException {
+        if(mPosition >= mBuffer.getCount()) {
+            throw new StreamCorruptedException("Failed to read byte.");
         }
-        return 0;
+        return mBuffer.getBuffer()[mBuffer.getOffset() + mPosition++];
     }
 
-    public int readInt() {
-        try {
-            return mBuffer.readInt();
-        } catch(Exception ignored) {
+    public short readShort() throws StreamCorruptedException {
+        if(mPosition + 2 > getLength()) {
+            throw new StreamCorruptedException("Failed to read short.");
         }
-        return 0;
+
+        short v = BufferHelpers.ReadShort(mBuffer.getBuffer(), mBuffer.getOffset() + mPosition);
+        mPosition += 2;
+        return v;
+    }
+
+    public int readInt() throws StreamCorruptedException {
+        if(mPosition + 4 > getLength()) {
+            throw new StreamCorruptedException("Failed to read int.");
+        }
+
+        int v = BufferHelpers.ReadInt(mBuffer.getBuffer(), mBuffer.getOffset() + mPosition);
+        mPosition += 4;
+        return v;
+    }
+
+
+    public String readString() throws StreamCorruptedException {
+        // First, read string length
+
+        int length = BufferHelpers.ReadInt(mBuffer.getBuffer(), mBuffer.getOffset() + mPosition);
+
+        if(mPosition + 4 + length > getLength()) {
+            throw new StreamCorruptedException("Failed to read string.");
+        }
+
+        String v = new String(mBuffer.getBuffer(), mBuffer.getOffset() + mPosition + 4, length);
+
+        mPosition += 4 + length;
+
+        return v;
     }
 }

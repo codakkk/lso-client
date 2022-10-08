@@ -3,6 +3,8 @@ package com.cclcgb.lso.models;
 import com.cclcgb.lso.api.LSOReader;
 import com.cclcgb.lso.api.LSOWriter;
 
+import java.io.StreamCorruptedException;
+
 public class Room implements ILSOSerializable {
     private int mId;
     private int mCount;
@@ -34,6 +36,10 @@ public class Room implements ILSOSerializable {
         return mName;
     }
 
+    public int getMaxCount() {
+        return mMaxCount;
+    }
+
     @Override
     public void Serialize(LSOWriter writer) {
 
@@ -41,8 +47,14 @@ public class Room implements ILSOSerializable {
 
     @Override
     public void Deserialize(LSOReader reader) {
-        mId = reader.readInt();
-        mCount = reader.readInt();
-        mMaxCount = reader.readInt();
+        try {
+            mId = reader.readInt();
+            mCount = reader.readInt();
+            mMaxCount = reader.readInt();
+            mName = reader.readString();
+
+        } catch(StreamCorruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

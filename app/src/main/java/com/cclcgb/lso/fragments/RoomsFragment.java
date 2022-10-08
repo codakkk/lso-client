@@ -44,15 +44,15 @@ public class RoomsFragment extends Fragment {
         mRoomsAdapter = new RoomsAdapter(getContext(), mRooms);
         mBinding.userRecyclerView.setAdapter(mRoomsAdapter);
 
-        /*LSOMessage requestRooms = LSOMessage.CreateEmpty(Tags.RequestRoomsTag);
-        APIManager.send(requestRooms);*/
+        LSOMessage requestRooms = LSOMessage.CreateEmpty(Tags.RequestRoomsTag);
+        APIManager.send(requestRooms);
 
         APIManager.addMessageReceivedListener((message -> {
-            if(message.getTag() == Tags.RequestRoomsTag) {
+            if(message.getTag() == Tags.RoomsTag) {
                 LSOReader reader = message.getReader();
                 Room room = new Room();
                 room.Deserialize(reader);
-
+                System.out.println(String.format("Room %d: %s, %d/%d", room.getId(), room.getName(), room.getCount(), room.getMaxCount()));
                 mRooms.add(room);
                 mRoomsAdapter.notifyDataSetChanged();
             }

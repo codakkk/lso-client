@@ -34,8 +34,10 @@ public class LoginFragment extends Fragment {
                 APIManager.send(m);
             }
             else if(message.getTag() == Tags.FirstConfigurationAccepted) {
-                NavDirections dir = LoginFragmentDirections.actionLoginFragmentToRoomsFragment();
-                Navigation.findNavController(requireView()).navigate(dir);
+                getActivity().runOnUiThread(() -> {
+                    NavDirections dir = LoginFragmentDirections.actionLoginFragmentToRoomsFragment();
+                    Navigation.findNavController(requireView()).navigate(dir);
+                });
             }
         }));
 

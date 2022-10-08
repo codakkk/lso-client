@@ -1,5 +1,7 @@
 package com.cclcgb.lso.api;
 
+import android.os.StrictMode;
+
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -34,7 +36,14 @@ public class APIManager implements Runnable{
     }
 
     public static void init() {
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
+        addMessageReceivedListener(mInstance::onMessageReceived);
+    }
+
+    private void onMessageReceived(LSOMessage message) {
+        System.out.println("Message received with tag " + message.getTag());
     }
 
     @Override
@@ -43,7 +52,6 @@ public class APIManager implements Runnable{
             mSocket = new Socket(InetAddress.getByName(ServerIP), Port);
             mWriter = new DataOutputStream(mSocket.getOutputStream());
             mReader = new DataInputStream(new BufferedInputStream(mSocket.getInputStream()));
-
 
             // First thing to do: send name
 
@@ -63,7 +71,7 @@ public class APIManager implements Runnable{
 
             mSocket.close();
         } catch(Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 

@@ -5,11 +5,17 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 
 import com.cclcgb.lso.adapters.HomeAdapter;
 import com.cclcgb.lso.R;
 import com.cclcgb.lso.api.APIManager;
+import com.cclcgb.lso.api.LSOMessage;
+import com.cclcgb.lso.api.Tags;
+import com.cclcgb.lso.api.messages.FirstConfigurationMessage;
 import com.cclcgb.lso.databinding.ActivityMainBinding;
+import com.cclcgb.lso.fragments.LoginFragmentDirections;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
@@ -22,7 +28,11 @@ public class MainActivity extends AppCompatActivity {
 
         APIManager.init();
         APIManager.enableDebug();
+        APIManager.addMessageReceivedListener((message -> {
+            if(message.getTag() == Tags.JoinRequestAccepted) {
 
+            }
+        }));
         binding.toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.logout) {
                 //auth.signOut();

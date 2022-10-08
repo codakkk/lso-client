@@ -1,5 +1,7 @@
 package com.cclcgb.lso.api;
 
+import androidx.annotation.NonNull;
+
 import com.cclcgb.lso.models.ILSOSerializable;
 
 import java.io.DataInputStream;
@@ -10,8 +12,6 @@ public class LSOMessage {
     private short mTag;
 
     private MessageBuffer mBuffer;
-
-    private LSOReader mReader;
 
     private LSOMessage() {}
 
@@ -26,10 +26,6 @@ public class LSOMessage {
 
     public short getTag() {
         return mTag;
-    }
-
-    public LSOReader getReader() {
-        return mReader;
     }
 
     public static LSOMessage Create(MessageBuffer buffer)
@@ -70,6 +66,7 @@ public class LSOMessage {
         return message;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "LSOMessage{" +
@@ -94,5 +91,9 @@ public class LSOMessage {
         // Same as totalLength + 2
         System.arraycopy(mBuffer.getBuffer(), 0, buffer.getBuffer(), 2, mBuffer.getCount());
         return buffer;
+    }
+
+    public LSOReader getReader() {
+        return LSOReader.Create(mBuffer.clone());
     }
 }
