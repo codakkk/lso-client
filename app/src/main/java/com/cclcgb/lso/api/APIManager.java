@@ -2,6 +2,8 @@ package com.cclcgb.lso.api;
 
 import android.os.StrictMode;
 
+import com.cclcgb.lso.activities.MainActivity;
+
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -9,6 +11,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class APIManager implements Runnable{
@@ -24,7 +27,8 @@ public class APIManager implements Runnable{
     private Socket mSocket;
 
     private DataOutputStream mWriter;
-    private DataInputStream mReader;
+
+    private MainActivity mActivity;
 
     private final List<IOnMessageReceived> mCallbacks = new ArrayList<>();
 
@@ -35,7 +39,9 @@ public class APIManager implements Runnable{
         addMessageReceivedListener((System.out::println));
     }
 
-    public static void init() {
+    public static void init(MainActivity mainActivity) {
+        mInstance.mActivity = mainActivity;
+
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
@@ -51,22 +57,17 @@ public class APIManager implements Runnable{
         try {
             mSocket = new Socket(InetAddress.getByName(ServerIP), Port);
             mWriter = new DataOutputStream(mSocket.getOutputStream());
-            mReader = new DataInputStream(new BufferedInputStream(mSocket.getInputStream()));
 
-            // First thing to do: send name
-
-            /*JoinRequestMessage joinRequestMessage = new JoinRequestMessage(mName);
-            LSOMessage m = LSOMessage.Create(Tags.JoinRequest, joinRequestMessage);
-            send(m);*/
-
+            byte[] bytes = new byte[1024];
             while(mInstance.mSocket.isConnected()) {
-                byte[] bytes = new byte[1024];
                 int size = mSocket.getInputStream().read(bytes);
 
                 MessageBuffer messageBuffer = MessageBuffer.Create(size, bytes);
                 LSOMessage message = LSOMessage.Create(messageBuffer);
 
-                mCallbacks.forEach((e) -> e.onMessageReceived(message));
+                dispatchOnMessageReceived(message);
+
+                Arrays.fill(bytes, (byte) 0);
             }
 
             mSocket.close();
@@ -102,5 +103,9 @@ public class APIManager implements Runnable{
 
     public static void removeMessageReceivedListener(IOnMessageReceived onMessageReceived) {
         mInstance.mCallbacks.remove(onMessageReceived);
+    }
+
+    private static void dispatchOnMessageReceived(LSOMessage message) {
+        mInstance.mActivity.runOnUiThread(() -> mInstance.mCallbacks.forEach((e) -> e.onMessageReceived(message)));
     }
 }

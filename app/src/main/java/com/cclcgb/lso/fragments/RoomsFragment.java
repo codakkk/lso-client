@@ -1,6 +1,8 @@
 package com.cclcgb.lso.fragments;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.nfc.Tag;
 import android.os.Bundle;
 
@@ -17,6 +19,7 @@ import com.cclcgb.lso.api.LSOReader;
 import com.cclcgb.lso.api.Tags;
 import com.cclcgb.lso.api.messages.JoinRoomAcceptedMessage;
 import com.cclcgb.lso.api.messages.JoinRoomMessage;
+import com.cclcgb.lso.api.messages.JoinRoomRefusedMessage;
 import com.cclcgb.lso.databinding.FragmentRoomsBinding;
 import com.cclcgb.lso.models.Message;
 import com.cclcgb.lso.models.Room;
@@ -85,14 +88,11 @@ public class RoomsFragment extends Fragment {
                 mRooms.add(room);
             }
 
-            getActivity().runOnUiThread(() -> {
-                mRoomsAdapter.notifyItemRangeChanged(0, mRooms.size()-1);
-            });
+            mRoomsAdapter.notifyItemRangeChanged(0, mRooms.size()-1);
         } else if(tag == Tags.JoinRoomAcceptedTag) {
-            JoinRoomAcceptedMessage acceptedMessage = reader.readSerializable(new JoinRoomAcceptedMessage());
-            System.out.println("Accepted in room " + acceptedMessage.getRoomId());
+            onJoinRoomAccepted(reader.readSerializable(new JoinRoomAcceptedMessage()));
         } else if(tag == Tags.JoinRoomRefusedTag) {
-            System.out.println("Join room refused ");
+            onJoinRoomRefused(reader.readSerializable(new JoinRoomRefusedMessage()));
         }
     }
 
@@ -104,7 +104,19 @@ public class RoomsFragment extends Fragment {
         dialog = new ProgressDialog(requireActivity());
         dialog.setMessage("Loading...");
         dialog.setCancelable(false);
+    }
 
+    private void onJoinRoomAccepted(JoinRoomAcceptedMessage message) {
+        System.out.println("Accepted in room " + message.getRoomId());
+    }
 
+    private void onJoinRoomRefused(JoinRoomRefusedMessage message) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Rejected")
+                .setMessage("Room is full")
+                .setPositiveButton(android.R.string.ok, null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+        System.out.println("Join room refused " + message.getRoomId());
     }
 }

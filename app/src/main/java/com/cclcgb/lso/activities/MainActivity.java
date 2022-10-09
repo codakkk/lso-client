@@ -26,13 +26,10 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        APIManager.init();
+        APIManager.init(this);
         APIManager.enableDebug();
-        APIManager.addMessageReceivedListener((message -> {
-            if(message.getTag() == Tags.JoinRequestAccepted) {
 
-            }
-        }));
+
         binding.toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.logout) {
                 //auth.signOut();
