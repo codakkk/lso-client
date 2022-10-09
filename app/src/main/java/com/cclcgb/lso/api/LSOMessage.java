@@ -4,8 +4,6 @@ import androidx.annotation.NonNull;
 
 import com.cclcgb.lso.models.ILSOSerializable;
 
-import java.io.DataInputStream;
-
 public class LSOMessage {
 
     private short mSize;
@@ -47,7 +45,7 @@ public class LSOMessage {
         LSOMessage message = new LSOMessage();
 
         LSOWriter writer = LSOWriter.Create();
-        writer.Write(serializable);
+        writer.write(serializable);
 
         message.mBuffer = writer.toBuffer();
 

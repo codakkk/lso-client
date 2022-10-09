@@ -1,5 +1,7 @@
 package com.cclcgb.lso.fragments;
 
+import android.app.ProgressDialog;
+import android.nfc.Tag;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,6 +15,8 @@ import com.cclcgb.lso.api.APIManager;
 import com.cclcgb.lso.api.LSOMessage;
 import com.cclcgb.lso.api.LSOReader;
 import com.cclcgb.lso.api.Tags;
+import com.cclcgb.lso.api.messages.JoinRoomAcceptedMessage;
+import com.cclcgb.lso.api.messages.JoinRoomMessage;
 import com.cclcgb.lso.databinding.FragmentRoomsBinding;
 import com.cclcgb.lso.models.Message;
 import com.cclcgb.lso.models.Room;
@@ -30,6 +34,8 @@ public class RoomsFragment extends Fragment {
     private final List<Room> mRooms = new ArrayList<>();
     RoomsAdapter mRoomsAdapter;
 
+    ProgressDialog dialog;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -41,42 +47,13 @@ public class RoomsFragment extends Fragment {
         /*mRooms.add(new Room(0, 2, "Politica"));
         mRooms.add(new Room(1, 1, "Meloni"));*/
 
-        mRoomsAdapter = new RoomsAdapter(getContext(), mRooms);
+        mRoomsAdapter = new RoomsAdapter(getContext(), mRooms, this::onRoomClicked);
         mBinding.userRecyclerView.setAdapter(mRoomsAdapter);
 
         LSOMessage requestRooms = LSOMessage.CreateEmpty(Tags.RequestRoomsTag);
         APIManager.send(requestRooms);
 
-        APIManager.addMessageReceivedListener((message -> {
-            if(message.getTag() == Tags.RoomsTag) {
-                LSOReader reader = message.getReader();
-                Room room = new Room();
-                room.Deserialize(reader);
-                System.out.println(String.format("Room %d: %s, %d/%d", room.getId(), room.getName(), room.getCount(), room.getMaxCount()));
-                mRooms.add(room);
-                mRoomsAdapter.notifyDataSetChanged();
-            }
-        }));
-        /*database.getReference().child("users").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                users.clear();
-                for(DataSnapshot snapshot1 : snapshot.getChildren()){
-                    User user = snapshot1.getValue(User.class);
-                    if(!user.getUid().equals(FirebaseAuth.getInstance().getUid())){
-                        users.add(user);
-                    }
-
-                }
-                userRecyclerView.hideShimmerAdapter();
-                usersAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });*/
+        APIManager.addMessageReceivedListener(this::onMessageReceived);
 
         return mBinding.getRoot();
     }
@@ -93,5 +70,41 @@ public class RoomsFragment extends Fragment {
         super.onPause();
         // String currentId = FirebaseAuth.getInstance().getUid();
         //database.getReference().child("presence").child(currentId).setValue("Offline");
+    }
+
+    private void onMessageReceived(LSOMessage message) {
+        short tag = message.getTag();
+        LSOReader reader = message.getReader();
+
+        if(tag == Tags.RoomTag) {
+            while(reader.getPosition() < reader.getLength())
+            {
+                Room room = new Room();
+                room.Deserialize(reader);
+
+                mRooms.add(room);
+            }
+
+            getActivity().runOnUiThread(() -> {
+                mRoomsAdapter.notifyItemRangeChanged(0, mRooms.size()-1);
+            });
+        } else if(tag == Tags.JoinRoomAcceptedTag) {
+            JoinRoomAcceptedMessage acceptedMessage = reader.readSerializable(new JoinRoomAcceptedMessage());
+            System.out.println("Accepted in room " + acceptedMessage.getRoomId());
+        } else if(tag == Tags.JoinRoomRefusedTag) {
+            System.out.println("Join room refused ");
+        }
+    }
+
+    private void onRoomClicked(Room room) {
+        JoinRoomMessage joinRoomMessage = new JoinRoomMessage(room.getId());
+        LSOMessage message = LSOMessage.Create(Tags.JoinRoomTag, joinRoomMessage);
+        APIManager.send(message);
+
+        dialog = new ProgressDialog(requireActivity());
+        dialog.setMessage("Loading...");
+        dialog.setCancelable(false);
+
+
     }
 }

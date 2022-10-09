@@ -11,4 +11,8 @@ public class Tags {
     public static short SendFirstConfiguration = 4;
     public static short FirstConfigurationAccepted = 5;
 
+    public static short RoomTag = 6;
+    public static short JoinRoomTag = 7;
+    public static short JoinRoomAcceptedTag = 8;
+    public static short JoinRoomRefusedTag = 9;
 }

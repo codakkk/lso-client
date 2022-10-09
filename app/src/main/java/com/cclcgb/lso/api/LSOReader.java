@@ -1,5 +1,7 @@
 package com.cclcgb.lso.api;
 
+import com.cclcgb.lso.models.ILSOSerializable;
+
 import java.io.StreamCorruptedException;
 
 public class LSOReader {
@@ -19,6 +21,14 @@ public class LSOReader {
 
     public int getLength() {
         return mBuffer.getCount();
+    }
+    public int getPosition() { return mPosition; }
+
+    public boolean readBoolean() throws StreamCorruptedException {
+        if(mPosition >= mBuffer.getCount()) {
+            throw new StreamCorruptedException("Failed to read boolean.");
+        }
+        return mBuffer.getBuffer()[mBuffer.getOffset() + mPosition++] == 1;
     }
 
     public byte readByte() throws StreamCorruptedException {
@@ -63,5 +73,13 @@ public class LSOReader {
         mPosition += 4 + length;
 
         return v;
+    }
+
+    public <T extends ILSOSerializable> T readSerializable(T serializable) {
+        if(serializable == null) {
+            return null;
+        }
+        serializable.Deserialize(this);
+        return serializable;
     }
 }

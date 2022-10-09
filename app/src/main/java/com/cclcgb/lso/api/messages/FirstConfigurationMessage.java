@@ -14,7 +14,7 @@ public class FirstConfigurationMessage implements ILSOSerializable {
 
     @Override
     public void Serialize(LSOWriter writer) {
-        writer.Write(mName);
+        writer.write(mName);
     }
 
     @Override

@@ -16,24 +16,19 @@ import com.cclcgb.lso.models.Message;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 
-public class MessagesAdapter extends RecyclerView.Adapter {
+public class ChatMessagesAdapter extends RecyclerView.Adapter {
 
     Context context;
-    ArrayList<Message> messages;
+    List<Message> messages;
 
     final int ITEM_SENT = 1;
     final int ITEM_RECEIVE = 2;
 
-    String senderRoom;
-    String receiverRoom;
-
-    public MessagesAdapter(Context context, ArrayList<Message> messages, String senderRoom, String receiverRoom) {
+    public ChatMessagesAdapter(Context context, List<Message> messages) {
         this.context = context;
         this.messages = messages;
-        this.senderRoom = senderRoom;
-        this.receiverRoom = receiverRoom;
     }
 
     @NonNull
@@ -51,6 +46,9 @@ public class MessagesAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         Message message = messages.get(position);
+        if(!message.getSenderId().equals("-1")) {
+            return ITEM_SENT;
+        }
         /*if (FirebaseAuth.getInstance().getUid().equals(message.getSenderId())) {
             return ITEM_SENT;
         } else {
@@ -63,15 +61,6 @@ public class MessagesAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Message message = messages.get(position);
 
-        int reactions[] = new int[]{
-                R.drawable.ic_fb_like,
-                R.drawable.ic_fb_love,
-                R.drawable.ic_fb_laugh,
-                R.drawable.ic_fb_wow,
-                R.drawable.ic_fb_sad,
-                R.drawable.ic_fb_angry
-        };
-
         if(holder.getClass()==SentViewHolder.class){
             SentViewHolder viewHolder = (SentViewHolder) holder;
             long time = message.getTimestamp();
@@ -80,10 +69,6 @@ public class MessagesAdapter extends RecyclerView.Adapter {
             if(message.getMessage().equals("Photo")){
                 viewHolder.binding.image.setVisibility(View.VISIBLE);
                 viewHolder.binding.message.setVisibility(View.GONE);
-                Glide.with(context)
-                        .load(message.getImageUrl())
-                        .placeholder(R.drawable.placeholder)
-                        .into(viewHolder.binding.image);
             }
             // viewHolder.binding.messageTime.setText(dateFormat.format(new Date(time)));
             viewHolder.binding.message.setText(message.getMessage());
@@ -95,10 +80,6 @@ public class MessagesAdapter extends RecyclerView.Adapter {
             if(message.getMessage().equals("Photo")){
                 viewHolder.binding.image.setVisibility(View.VISIBLE);
                 viewHolder.binding.message.setVisibility(View.GONE);
-                Glide.with(context)
-                        .load(message.getImageUrl())
-                        .placeholder(R.drawable.placeholder)
-                        .into(viewHolder.binding.image);
             }
             // viewHolder.binding.messageTime.setText(dateFormat.format(new Date(time)));
             viewHolder.binding.message.setText(message.getMessage());

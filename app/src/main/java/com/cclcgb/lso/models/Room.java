@@ -41,9 +41,7 @@ public class Room implements ILSOSerializable {
     }
 
     @Override
-    public void Serialize(LSOWriter writer) {
-
-    }
+    public void Serialize(LSOWriter writer) { }
 
     @Override
     public void Deserialize(LSOReader reader) {

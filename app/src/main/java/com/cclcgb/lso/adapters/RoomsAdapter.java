@@ -1,46 +1,44 @@
 package com.cclcgb.lso.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.cclcgb.lso.activities.ChatActivity;
 import com.cclcgb.lso.R;
 import com.cclcgb.lso.models.Room;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.MyViewHolder> {
-    Context context;
-    List<Room> rooms;
+    Context mContext;
+    List<Room> mRooms;
 
-    public RoomsAdapter(Context context, List<Room> rooms) {
-        this.context = context;
-        this.rooms = rooms;
+    IOnRoomClicked mOnRoomClicked;
+
+    public RoomsAdapter(Context context, List<Room> mRooms, IOnRoomClicked onRoomClicked) {
+        this.mContext = context;
+        this.mRooms = mRooms;
+        mOnRoomClicked = onRoomClicked;
     }
 
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull  ViewGroup parent, int viewType) {
-        View view =  LayoutInflater.from(context).inflate(R.layout.room_layout, parent, false);
+        View view =  LayoutInflater.from(mContext).inflate(R.layout.room_layout, parent, false);
         return new MyViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RoomsAdapter.MyViewHolder holder, int position) {
-        Room room = rooms.get(position);
+        Room room = mRooms.get(position);
 
         holder.roomName.setText(room.getName());
-        holder.counter.setText(context.getString(R.string.counterHint, room.getCount()));
+        holder.counter.setText(mContext.getString(R.string.counterHint, room.getCount(), room.getMaxCount()));
 
         /*FirebaseDatabase.getInstance().getReference()
                 .child("chats")
@@ -66,19 +64,13 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.MyViewHolder
 
                     }
                 });*/
-        /*holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, ChatActivity.class);
-            intent.putExtra("name", user.getName());
-            intent.putExtra("uid", user.getUid());
-            intent.putExtra("image_url", user.getProfileImage());
-            context.startActivity(intent);
-        });*/
+        holder.itemView.setOnClickListener(v -> mOnRoomClicked.onClick(room));
     }
 
 
     @Override
     public int getItemCount() {
-        return rooms.size();
+        return mRooms.size();
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
@@ -89,5 +81,9 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.MyViewHolder
             roomName = itemView.findViewById(R.id.roomName);
             counter = itemView.findViewById(R.id.counter);
         }
+    }
+
+    public interface IOnRoomClicked {
+        void onClick(Room room);
     }
 }

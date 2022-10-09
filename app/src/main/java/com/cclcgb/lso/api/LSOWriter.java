@@ -28,7 +28,7 @@ public class LSOWriter {
         return writer;
     }
 
-    public void Write(byte value) {
+    public void write(byte value) {
         mBuffer.ensureSize(mPosition + 1);
 
         mBuffer.getBuffer()[mPosition++] = value;
@@ -36,11 +36,11 @@ public class LSOWriter {
         mBuffer.setCount(Math.max(getLength(), mPosition));
     }
 
-    public void Write(boolean value) {
-        Write((byte)(value ? 1 : 0));
+    public void write(boolean value) {
+        write((byte)(value ? 1 : 0));
     }
 
-    public void Write(short value) {
+    public void write(short value) {
         mBuffer.ensureSize(mPosition + 2);
 
         BufferHelpers.WriteBytes(mBuffer.getBuffer(), mPosition, value);
@@ -50,7 +50,7 @@ public class LSOWriter {
         mBuffer.setCount(Math.max(getLength(), mPosition));
     }
 
-    public void Write(int value) {
+    public void write(int value) {
         mBuffer.ensureSize(mPosition + 4);
 
         BufferHelpers.WriteBytes(mBuffer.getBuffer(), mPosition, value);
@@ -60,7 +60,7 @@ public class LSOWriter {
         mBuffer.setCount(Math.max(getLength(), mPosition));
     }
 
-    public void Write(String value) {
+    public void write(String value) {
         final byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
 
         // 4 is int-size for string length
@@ -78,7 +78,7 @@ public class LSOWriter {
         mBuffer.setCount(Math.max(getLength(), mPosition));
     }
 
-    public <T extends ILSOSerializable> void Write(T serializable) {
+    public <T extends ILSOSerializable> void write(T serializable) {
         serializable.Serialize(this);
     }
 

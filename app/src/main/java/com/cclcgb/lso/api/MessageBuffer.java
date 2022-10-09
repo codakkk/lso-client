@@ -44,7 +44,7 @@ public class MessageBuffer implements Cloneable {
         System.arraycopy(bytes, 0, buffer.mBuffer, 0, size);
 
         buffer.mOffset = 0;
-        buffer.mCount = bytes.length;
+        buffer.mCount = size;
 
         return buffer;
     }

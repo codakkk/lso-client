@@ -1,12 +1,7 @@
 package com.cclcgb.lso.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
-import android.app.ProgressDialog;
 import android.os.Bundle;
-import com.cclcgb.lso.adapters.MessagesAdapter;
-import com.cclcgb.lso.databinding.ActivityChatBinding;
-import com.cclcgb.lso.models.Message;
-import java.util.ArrayList;
 
 public class ChatActivity extends AppCompatActivity {
     /*ActivityChatBinding binding;
