@@ -15,4 +15,10 @@ public class Tags {
     public static short JoinRoomTag = 7;
     public static short JoinRoomAcceptedTag = 8;
     public static short JoinRoomRefusedTag = 9;
+
+    public static short OnMatchTag = 10;
+    public static short SendMessageTag = 11;
+
+    public static short ConfirmSentMessage = 12;
+    public static short RejectSentMessage = 13;
 }

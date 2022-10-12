@@ -8,103 +8,120 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.cclcgb.lso.R;
 import com.cclcgb.lso.databinding.ItemReceiveBinding;
 import com.cclcgb.lso.databinding.ItemSentBinding;
-import com.cclcgb.lso.models.Message;
+import com.cclcgb.lso.databinding.ItemServerBinding;
+import com.cclcgb.lso.models.ChatMessage;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ChatMessagesAdapter extends RecyclerView.Adapter {
 
-    Context context;
-    List<Message> messages;
+    Context mContext;
+    List<ChatMessage> mChatMessages;
 
     final int ITEM_SENT = 1;
     final int ITEM_RECEIVE = 2;
+    final int ITEM_SERVER = 3;
 
-    public ChatMessagesAdapter(Context context, List<Message> messages) {
-        this.context = context;
-        this.messages = messages;
+    public ChatMessagesAdapter(Context mContext, List<ChatMessage> chatMessages) {
+        this.mContext = mContext;
+        this.mChatMessages = chatMessages;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if(viewType == ITEM_SENT){
-            View view = LayoutInflater.from(context).inflate(R.layout.item_sent, parent, false);
-            return new SentViewHolder(view);
-        } else {
-            View view = LayoutInflater.from(context).inflate(R.layout.item_receive, parent, false);
-            return new ReceiverViewHolder(view);
+            ItemSentBinding binding = ItemSentBinding.inflate(LayoutInflater.from(mContext), parent, false);
+            return new SentViewHolder(binding);
         }
+        else if(viewType == ITEM_SERVER) {
+            ItemServerBinding binding = ItemServerBinding.inflate(LayoutInflater.from(mContext), parent, false);
+            return new ServerViewHolder(binding);
+        }
+        ItemReceiveBinding binding = ItemReceiveBinding.inflate(LayoutInflater.from(mContext), parent, false);
+        return new ReceiverViewHolder(binding);
     }
 
     @Override
     public int getItemViewType(int position) {
-        Message message = messages.get(position);
-        if(!message.getSenderId().equals("-1")) {
+        ChatMessage chatMessage = mChatMessages.get(position);
+        if(chatMessage.getSenderId().equals("-1")) {
+            return ITEM_SERVER;
+        }
+        else if(chatMessage.getSenderId().equals("0")) {
             return ITEM_SENT;
         }
+        return ITEM_RECEIVE;
         /*if (FirebaseAuth.getInstance().getUid().equals(message.getSenderId())) {
             return ITEM_SENT;
         } else {
             return ITEM_RECEIVE;
         }*/
-        return ITEM_RECEIVE;
+        // return ITEM_SENT;
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        Message message = messages.get(position);
+        ChatMessage chatMessage = mChatMessages.get(position);
 
-        if(holder.getClass()==SentViewHolder.class){
+        if(holder.getClass() == SentViewHolder.class){
             SentViewHolder viewHolder = (SentViewHolder) holder;
-            long time = message.getTimestamp();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
+            // long time = message.getTimestamp();
+            // SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
 
-            if(message.getMessage().equals("Photo")){
-                viewHolder.binding.image.setVisibility(View.VISIBLE);
-                viewHolder.binding.message.setVisibility(View.GONE);
+            if(chatMessage.getMessage().equals("Photo")) {
+                viewHolder.mBinding.image.setVisibility(View.VISIBLE);
+                viewHolder.mBinding.chatMessage.setVisibility(View.GONE);
             }
             // viewHolder.binding.messageTime.setText(dateFormat.format(new Date(time)));
-            viewHolder.binding.message.setText(message.getMessage());
+            viewHolder.mBinding.chatMessage.setText(chatMessage.getMessage());
 
-        } else {
+        } else if(holder instanceof ReceiverViewHolder) {
             ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
-            long time = message.getTimestamp();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
-            if(message.getMessage().equals("Photo")){
-                viewHolder.binding.image.setVisibility(View.VISIBLE);
-                viewHolder.binding.message.setVisibility(View.GONE);
-            }
-            // viewHolder.binding.messageTime.setText(dateFormat.format(new Date(time)));
-            viewHolder.binding.message.setText(message.getMessage());
+            // long time = message.getTimestamp();
+            // SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
 
+            // viewHolder.binding.messageTime.setText(dateFormat.format(new Date(time)));
+            viewHolder.mBinding.chatMessage.setText(chatMessage.getMessage());
+
+        } else if(holder instanceof ServerViewHolder) {
+            ServerViewHolder viewHolder = (ServerViewHolder) holder;
+            // long time = message.getTimestamp();
+            // SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
+            // viewHolder.binding.messageTime.setText(dateFormat.format(new Date(time)));
+            viewHolder.mBinding.chatMessage.setText(chatMessage.getMessage());
         }
     }
 
     @Override
     public int getItemCount() {
-        return messages.size();
+        return mChatMessages.size();
     }
 
-    public class SentViewHolder extends RecyclerView.ViewHolder {
-        ItemSentBinding binding;
-        public SentViewHolder(@NonNull View itemView) {
-            super(itemView);
-            binding = ItemSentBinding.bind(itemView);
+    public static class SentViewHolder extends RecyclerView.ViewHolder {
+        ItemSentBinding mBinding;
+        public SentViewHolder(@NonNull ItemSentBinding itemView) {
+            super(itemView.getRoot());
+            mBinding = itemView;
         }
     }
 
-    public class ReceiverViewHolder extends RecyclerView.ViewHolder {
-        ItemReceiveBinding binding;
-        public ReceiverViewHolder(@NonNull View itemView) {
-            super(itemView);
-            binding = ItemReceiveBinding.bind(itemView);
+    public static class ReceiverViewHolder extends RecyclerView.ViewHolder {
+        ItemReceiveBinding mBinding;
+        public ReceiverViewHolder(@NonNull ItemReceiveBinding itemView) {
+            super(itemView.getRoot());
+            mBinding = itemView;
+        }
+    }
+
+    public static class ServerViewHolder extends RecyclerView.ViewHolder {
+        ItemServerBinding mBinding;
+        public ServerViewHolder(@NonNull ItemServerBinding binding) {
+            super(binding.getRoot());
+            mBinding = binding;
         }
     }
 }

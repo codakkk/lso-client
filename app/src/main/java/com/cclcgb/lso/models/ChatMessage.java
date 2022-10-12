@@ -1,18 +1,18 @@
 package com.cclcgb.lso.models;
 
-public class Message {
+public class ChatMessage {
     private String messageId;
     private String message;
     private String senderId;
     private long timestamp;
 
-    public Message(String message, String senderId, long timestamp) {
+    public ChatMessage(String message, String senderId, long timestamp) {
         this.message = message;
         this.senderId = senderId;
         this.timestamp = timestamp;
     }
 
-    public Message() {
+    public ChatMessage() {
     }
 
     public String getMessageId() {

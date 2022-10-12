@@ -2,12 +2,12 @@ package com.cclcgb.lso.fragments;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
-import android.nfc.Tag;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,12 +21,9 @@ import com.cclcgb.lso.api.messages.JoinRoomAcceptedMessage;
 import com.cclcgb.lso.api.messages.JoinRoomMessage;
 import com.cclcgb.lso.api.messages.JoinRoomRefusedMessage;
 import com.cclcgb.lso.databinding.FragmentRoomsBinding;
-import com.cclcgb.lso.models.Message;
 import com.cclcgb.lso.models.Room;
-import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 
 import com.cclcgb.lso.adapters.RoomsAdapter;
-import com.cclcgb.lso.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,6 +105,8 @@ public class RoomsFragment extends Fragment {
 
     private void onJoinRoomAccepted(JoinRoomAcceptedMessage message) {
         System.out.println("Accepted in room " + message.getRoomId());
+        NavDirections dir = RoomsFragmentDirections.actionRoomsFragmentToChatFragment(message.getRoomId());
+        Navigation.findNavController(requireView()).navigate(dir);
     }
 
     private void onJoinRoomRefused(JoinRoomRefusedMessage message) {

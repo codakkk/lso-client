@@ -91,7 +91,7 @@
             android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/editTextTextPersonName"
+                android:id="@+id/inputMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -103,7 +103,7 @@
                 android:background="@android:color/transparent"
                 android:ems="10"
                 android:fontFamily="@font/poppins"
-                android:hint="Type a message..."
+                android:hint="Type a chatMessage..."
                 android:inputType="textPersonName"
                 android:padding="8dp"
                 android:textColor="@color/black"
