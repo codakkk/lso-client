@@ -3,13 +3,11 @@ package com.cclcgb.lso.models;
 public class ChatMessage {
     private String messageId;
     private String message;
-    private String senderId;
-    private long timestamp;
+    private int senderId;
 
-    public ChatMessage(String message, String senderId, long timestamp) {
+    public ChatMessage(String message, int senderId) {
         this.message = message;
         this.senderId = senderId;
-        this.timestamp = timestamp;
     }
 
     public ChatMessage() {
@@ -31,19 +29,11 @@ public class ChatMessage {
         this.message = message;
     }
 
-    public String getSenderId() {
+    public int getSenderId() {
         return senderId;
     }
 
-    public void setSenderId(String senderId) {
+    public void setSenderId(int senderId) {
         this.senderId = senderId;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 }

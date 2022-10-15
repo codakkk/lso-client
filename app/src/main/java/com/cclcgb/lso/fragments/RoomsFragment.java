@@ -27,6 +27,7 @@ import com.cclcgb.lso.adapters.RoomsAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RoomsFragment extends Fragment {
     FragmentRoomsBinding mBinding;
@@ -43,9 +44,6 @@ public class RoomsFragment extends Fragment {
 
 
         mBinding.userRecyclerView.showShimmerAdapter();
-
-        /*mRooms.add(new Room(0, 2, "Politica"));
-        mRooms.add(new Room(1, 1, "Meloni"));*/
 
         mRoomsAdapter = new RoomsAdapter(getContext(), mRooms, this::onRoomClicked);
         mBinding.userRecyclerView.setAdapter(mRoomsAdapter);
@@ -105,8 +103,21 @@ public class RoomsFragment extends Fragment {
 
     private void onJoinRoomAccepted(JoinRoomAcceptedMessage message) {
         System.out.println("Accepted in room " + message.getRoomId());
-        NavDirections dir = RoomsFragmentDirections.actionRoomsFragmentToChatFragment(message.getRoomId());
-        Navigation.findNavController(requireView()).navigate(dir);
+        View view = getView();
+        if(view != null) {
+            Room room = null;
+
+            for(Room r : mRooms) {
+                if(r.getId() != message.getRoomId()) continue;
+                room = r;
+                break;
+            }
+
+            Objects.requireNonNull(room);
+
+            NavDirections dir = RoomsFragmentDirections.actionRoomsFragmentToChatFragment(message.getRoomId(), room.getName());
+            Navigation.findNavController(view).navigate(dir);
+        }
     }
 
     private void onJoinRoomRefused(JoinRoomRefusedMessage message) {

@@ -21,4 +21,8 @@ public class Tags {
 
     public static short ConfirmSentMessage = 12;
     public static short RejectSentMessage = 13;
+
+    public static short LeaveRoom = 14;
+    public static short LeaveChat = 15;
+
 }

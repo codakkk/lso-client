@@ -17,7 +17,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:menu="@menu/toolbar_menu"
         app:title="LSO - Random Chat"
         app:titleTextAppearance="@style/toolbar_title"
         app:titleTextColor="@color/white" />

@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 
 import com.cclcgb.lso.adapters.ChatMessagesAdapter;
 import com.cclcgb.lso.api.APIManager;
@@ -17,19 +19,16 @@ import com.cclcgb.lso.api.messages.OnMatchMessage;
 import com.cclcgb.lso.api.messages.SendMessage;
 import com.cclcgb.lso.databinding.FragmentChatBinding;
 import com.cclcgb.lso.models.ChatMessage;
+import com.cclcgb.lso.models.User;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class ChatFragment extends Fragment {
-    FragmentChatBinding mBinding;
-    ChatMessagesAdapter mAdapter;
+    private FragmentChatBinding mBinding;
+    private ChatMessagesAdapter mAdapter;
 
-    private int mRoomId;
-
-    private boolean mIsMatched;
-    private String mMatchedWithName;
+    private User mMatch;
 
     private final List<ChatMessage> mChatMessages = new ArrayList<>();
 
@@ -39,62 +38,103 @@ public class ChatFragment extends Fragment {
         mBinding = FragmentChatBinding.inflate(inflater, container, false);
 
         ChatFragmentArgs args = ChatFragmentArgs.fromBundle(getArguments());
-        mRoomId = args.getRoomId();
+        int mRoomId = args.getRoomId();
+        String mRoomName = args.getRoomName();
+
+        mBinding.roomName.setText(mRoomName);
 
         mAdapter = new ChatMessagesAdapter(requireContext(), mChatMessages);
         mBinding.chatRecyclerView.setAdapter(mAdapter);
 
-        publishMessage("SERVER: Waiting for a match...", "-1");
+        publishMessage("SERVER: Waiting for a match...", -1);
 
         APIManager.addMessageReceivedListener(this::onMessageReceived);
 
-        mBinding.sendButton.setOnClickListener((v) -> {
-            String data = mBinding.inputMessage.getText().toString();
-            if(data.length() == 0) {
-                return;
-            }
+        mBinding.sendButton.setOnClickListener(this::onSendButton);
 
-            LSOMessage sendMessage = LSOMessage.Create(Tags.SendMessageTag, new SendMessage(data));
-            APIManager.send(sendMessage);
+        mBinding.backButton.setOnClickListener(this::onBackButton);
 
-            mBinding.inputMessage.setText("");
-        });
+        mBinding.newMatch.setOnClickListener(this::onRequestNewMatch);
+
         return mBinding.getRoot();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        // String currentId = FirebaseAuth.getInstance().getUid();
-        //database.getReference().child("presence").child(currentId).setValue("Online");
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        // String currentId = FirebaseAuth.getInstance().getUid();
-        //database.getReference().child("presence").child(currentId).setValue("Offline");
-    }
-
-    public void publishMessage(String message, String senderId) {
-        mChatMessages.add(new ChatMessage(message, senderId, new Date().getTime()));
+    public void publishMessage(String message, int senderId) {
+        mChatMessages.add(new ChatMessage(message, senderId));
         mAdapter.notifyItemInserted(mChatMessages.size() - 1);
+        mBinding.chatRecyclerView.smoothScrollToPosition(mChatMessages.size() - 1);
     }
 
     private void onMessageReceived(LSOMessage message) {
         LSOReader reader = message.getReader();
+
         if(message.getTag() == Tags.OnMatchTag) {
             OnMatchMessage onMatchMessage = reader.readSerializable(new OnMatchMessage());
-            mMatchedWithName = onMatchMessage.getName();
-            mIsMatched = true;
 
-            publishMessage("SERVER: Matched with " + mMatchedWithName, "-1");
+            setMatch(onMatchMessage.getUser());
+
+            publishMessage("SERVER: Matched with " + mMatch.getName(), -1);
         } else if(message.getTag() == Tags.ConfirmSentMessage) {
             SendMessage sendMessage = reader.readSerializable(new SendMessage());
-            publishMessage(sendMessage.getMessage(), "0");
+            publishMessage(sendMessage.getMessage(), 0);
         } else if(message.getTag() == Tags.SendMessageTag) {
             SendMessage sendMessage = reader.readSerializable(new SendMessage());
-            publishMessage(sendMessage.getMessage(), "1");
+            publishMessage(sendMessage.getMessage(), 1);
+        } else if(message.getTag() == Tags.LeaveChat) {
+            publishMessage( mMatch.getName() + " left the chat.", -1);
+            publishMessage("Waiting for new match...", -1);
+
+            setMatch(null);
         }
+    }
+
+    private void onRequestNewMatch(View view) {
+        if(mMatch == null)
+        {
+            publishMessage("You're not matched yet.", -1);
+            return;
+        }
+
+        setMatch(null);
+
+        LSOMessage leaveChatMessage = LSOMessage.CreateEmpty(Tags.LeaveChat);
+        APIManager.send(leaveChatMessage);
+
+        publishMessage("You left the chat.", -1);
+        publishMessage("Waiting for a new match...", -1);
+    }
+
+    private void onSendButton(View view) {
+        String data = mBinding.inputMessage.getText().toString();
+        if(data.length() == 0) {
+            return;
+        }
+
+        if(mMatch == null) {
+            publishMessage("Cannot send messages without a match.", -1);
+            return;
+        }
+
+        LSOMessage sendMessage = LSOMessage.Create(Tags.SendMessageTag, new SendMessage(data));
+        APIManager.send(sendMessage);
+
+        mBinding.inputMessage.setText("");
+    }
+
+    private void onBackButton(View view) {
+        if(view == null) {
+            return;
+        }
+
+        LSOMessage leaveRoomMessage = LSOMessage.CreateEmpty(Tags.LeaveRoom);
+        APIManager.send(leaveRoomMessage);
+
+        NavDirections dir = ChatFragmentDirections.actionChatFragmentToRoomsFragment();
+        Navigation.findNavController(view).navigate(dir);
+    }
+
+    private void setMatch(User user) {
+        mMatch = user;
+        mBinding.matchedWithName.setText(mMatch == null ? "Match: waiting" : "Match: " + mMatch.getName());
     }
 }

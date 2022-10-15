@@ -32,6 +32,8 @@ public class APIManager implements Runnable{
 
     private final List<IOnMessageReceived> mCallbacks = new ArrayList<>();
 
+    private final List<IOnConnectionClose> mOnConnectionCloseCallback = new ArrayList<>();
+
     private APIManager() {
     }
 
@@ -62,6 +64,10 @@ public class APIManager implements Runnable{
             while(mInstance.mSocket.isConnected()) {
                 int size = mSocket.getInputStream().read(bytes);
 
+                if(size < 0) {
+                    break;
+                }
+
                 MessageBuffer messageBuffer = MessageBuffer.Create(size, bytes);
                 LSOMessage message = LSOMessage.Create(messageBuffer);
 
@@ -69,6 +75,8 @@ public class APIManager implements Runnable{
 
                 Arrays.fill(bytes, (byte) 0);
             }
+
+            mInstance.mActivity.runOnUiThread(() -> mInstance.mOnConnectionCloseCallback.forEach(IOnConnectionClose::onClose));
 
             mSocket.close();
         } catch(Exception e) {
@@ -108,4 +116,13 @@ public class APIManager implements Runnable{
     private static void dispatchOnMessageReceived(LSOMessage message) {
         mInstance.mActivity.runOnUiThread(() -> mInstance.mCallbacks.forEach((e) -> e.onMessageReceived(message)));
     }
+
+    public static void addOnConnectionClosedListener(IOnConnectionClose c) {
+        mInstance.mOnConnectionCloseCallback.add(c);
+    }
+
+    public static void removeOnConnectionClosedListener(IOnConnectionClose c) {
+        mInstance.mOnConnectionCloseCallback.remove(c);
+    }
+
 }

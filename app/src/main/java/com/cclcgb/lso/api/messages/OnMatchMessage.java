@@ -3,12 +3,12 @@ package com.cclcgb.lso.api.messages;
 import com.cclcgb.lso.api.LSOReader;
 import com.cclcgb.lso.api.LSOWriter;
 import com.cclcgb.lso.models.ILSOSerializable;
+import com.cclcgb.lso.models.User;
 
 public class OnMatchMessage implements ILSOSerializable {
 
     private int mRoomId;
-    private int mClientId;
-    private String mName;
+    private User mUser;
 
     @Override
     public void Serialize(LSOWriter writer) {}
@@ -17,23 +17,18 @@ public class OnMatchMessage implements ILSOSerializable {
     public void Deserialize(LSOReader reader) {
         try {
             mRoomId = reader.readInt();
-            mClientId = reader.readInt();
-            mName = reader.readString();
+            mUser = reader.readSerializable(new User());
         } catch(Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    public String getName() {
-        return mName;
-    }
-
-    public int getClientId() {
-        return mClientId;
-    }
-
     public int getRoomId() {
         return mRoomId;
+    }
+
+    public User getUser() {
+        return mUser;
     }
 }

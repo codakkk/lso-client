@@ -29,5 +29,11 @@
         <argument
             android:name="roomId"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_chatFragment_to_roomsFragment"
+            app:destination="@id/roomsFragment" />
+        <argument
+            android:name="roomName"
+            app:argType="string" />
     </fragment>
 </navigation>

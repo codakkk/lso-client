@@ -48,19 +48,13 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         ChatMessage chatMessage = mChatMessages.get(position);
-        if(chatMessage.getSenderId().equals("-1")) {
+        if(chatMessage.getSenderId() == -1) {
             return ITEM_SERVER;
         }
-        else if(chatMessage.getSenderId().equals("0")) {
+        else if(chatMessage.getSenderId() == 0) {
             return ITEM_SENT;
         }
         return ITEM_RECEIVE;
-        /*if (FirebaseAuth.getInstance().getUid().equals(message.getSenderId())) {
-            return ITEM_SENT;
-        } else {
-            return ITEM_RECEIVE;
-        }*/
-        // return ITEM_SENT;
     }
 
     @Override
