@@ -22,13 +22,14 @@ import com.cclcgb.lso.models.ChatMessage;
 import com.cclcgb.lso.models.User;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ChatFragment extends Fragment {
     private FragmentChatBinding mBinding;
     private ChatMessagesAdapter mAdapter;
 
-    private User mMatch;
+    private OnMatchMessage mMatch;
 
     private final List<ChatMessage> mChatMessages = new ArrayList<>();
 
@@ -71,17 +72,17 @@ public class ChatFragment extends Fragment {
         if(message.getTag() == Tags.OnMatchTag) {
             OnMatchMessage onMatchMessage = reader.readSerializable(new OnMatchMessage());
 
-            setMatch(onMatchMessage.getUser());
+            setMatch(onMatchMessage);
 
-            publishMessage("SERVER: Matched with " + mMatch.getName(), -1);
+            publishMessage("SERVER: Matched with " + mMatch.getUser().getName(), -1);
         } else if(message.getTag() == Tags.ConfirmSentMessage) {
             SendMessage sendMessage = reader.readSerializable(new SendMessage());
             publishMessage(sendMessage.getMessage(), 0);
-        } else if(message.getTag() == Tags.SendMessageTag) {
+        } else if(message.getTag() == Tags.MessageTag) {
             SendMessage sendMessage = reader.readSerializable(new SendMessage());
             publishMessage(sendMessage.getMessage(), 1);
         } else if(message.getTag() == Tags.LeaveChat) {
-            publishMessage( mMatch.getName() + " left the chat.", -1);
+            publishMessage( mMatch.getUser().getName() + " left the chat.", -1);
             publishMessage("Waiting for new match...", -1);
 
             setMatch(null);
@@ -115,7 +116,7 @@ public class ChatFragment extends Fragment {
             return;
         }
 
-        LSOMessage sendMessage = LSOMessage.Create(Tags.SendMessageTag, new SendMessage(data));
+        LSOMessage sendMessage = LSOMessage.Create(Tags.MessageTag, new SendMessage(data));
         APIManager.send(sendMessage);
 
         mBinding.inputMessage.setText("");
@@ -133,8 +134,16 @@ public class ChatFragment extends Fragment {
         Navigation.findNavController(view).navigate(dir);
     }
 
-    private void setMatch(User user) {
-        mMatch = user;
-        mBinding.matchedWithName.setText(mMatch == null ? "Match: waiting" : "Match: " + mMatch.getName());
+    private void setMatch(OnMatchMessage match) {
+        mMatch = match;
+
+        String text = "Match: waiting";
+
+        if(mMatch != null) {
+            long lastSeconds = (System.currentTimeMillis() / 1000) - mMatch.getStartTimestamp();
+            text = String.format("Match: %s (time: %02d)", mMatch.getUser().getName(), lastSeconds);
+        }
+
+        mBinding.matchedWithName.setText(text);
     }
 }

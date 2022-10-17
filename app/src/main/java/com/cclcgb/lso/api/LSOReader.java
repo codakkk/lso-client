@@ -58,6 +58,15 @@ public class LSOReader {
         return v;
     }
 
+    public long readLong() throws StreamCorruptedException {
+        if(mPosition + 8 > getLength()) {
+            throw new StreamCorruptedException("Failed to read long.");
+        }
+
+        long v = BufferHelpers.ReadLong(mBuffer.getBuffer(), mBuffer.getOffset() + mPosition);
+        mPosition += 8;
+        return v;
+    }
 
     public String readString() throws StreamCorruptedException {
         // First, read string length

@@ -6,9 +6,9 @@ import com.cclcgb.lso.models.ILSOSerializable;
 import com.cclcgb.lso.models.User;
 
 public class OnMatchMessage implements ILSOSerializable {
-
-    private int mRoomId;
     private User mUser;
+    private long mStartTimestamp;
+    private int mMaxChatTimeInSeconds;
 
     @Override
     public void Serialize(LSOWriter writer) {}
@@ -16,19 +16,24 @@ public class OnMatchMessage implements ILSOSerializable {
     @Override
     public void Deserialize(LSOReader reader) {
         try {
-            mRoomId = reader.readInt();
             mUser = reader.readSerializable(new User());
+            mStartTimestamp = reader.readLong();
+            mMaxChatTimeInSeconds = reader.readInt();
         } catch(Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    public int getRoomId() {
-        return mRoomId;
-    }
-
     public User getUser() {
         return mUser;
+    }
+
+    public long getStartTimestamp() {
+        return mStartTimestamp;
+    }
+
+    public int getMaxChatTimeInSeconds() {
+        return mMaxChatTimeInSeconds;
     }
 }

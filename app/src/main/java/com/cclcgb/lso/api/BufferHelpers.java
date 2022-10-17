@@ -34,16 +34,28 @@ public class BufferHelpers {
     }
 
     public static short ReadShort(byte[] bytes, int start) {
-        short v1 = ((short)bytes[start]);
+        short v1 = (short) (((short)bytes[start + 0]) << 8);
         short v2 = (short)bytes[start + 1];
         return (short)((v1 << 8) | v2);
     }
 
     public static int ReadInt(byte[] bytes, int start) {
-        int v1 = ((int)bytes[start]) << 24;
+        int v1 = ((int)bytes[start + 0]) << 24;
         int v2 = ((int)bytes[start + 1]) << 16;
         int v3 = ((int)bytes[start + 2]) << 8;
         int v4 = (int)bytes[start + 3];
         return (int)(v1 | v2 | v3 | v4);
+    }
+
+    public static long ReadLong(byte[] bytes, int start) {
+        long v1 = ((long)bytes[start + 0]) << 56;
+        long v2 = ((long)bytes[start + 1]) << 48;
+        long v3 = ((long)bytes[start + 2]) << 40;
+        long v4 = ((long)bytes[start + 3]) << 32;
+        long v5 = ((long)bytes[start + 4]) << 24;
+        long v6 = ((long)bytes[start + 5]) << 16;
+        long v7 = ((long)bytes[start + 6]) << 8;
+        long v8 = (long)bytes[start + 7];
+        return (long)(v1 | v2 | v3 | v4 | v5 | v6 | v7 | v8);
     }
 }
