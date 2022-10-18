@@ -1,6 +1,8 @@
 package com.cclcgb.lso.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +34,8 @@ public class ChatFragment extends Fragment {
     private OnMatchMessage mMatch;
 
     private final List<ChatMessage> mChatMessages = new ArrayList<>();
+
+    private CountDownTimer mTimer;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -134,16 +138,35 @@ public class ChatFragment extends Fragment {
         Navigation.findNavController(view).navigate(dir);
     }
 
+    @SuppressLint("DefaultLocale")
     private void setMatch(OnMatchMessage match) {
         mMatch = match;
 
-        String text = "Match: waiting";
-
-        if(mMatch != null) {
-            long lastSeconds = (System.currentTimeMillis() / 1000) - mMatch.getStartTimestamp();
-            text = String.format("Match: %s (time: %02d)", mMatch.getUser().getName(), lastSeconds);
+        if(mTimer != null) {
+            mTimer.cancel();
         }
 
-        mBinding.matchedWithName.setText(text);
+        final String[] text = {"Match: waiting"};
+
+        if(mMatch != null) {
+            long chatTime = match.getEndTimestamp() - match.getStartTimestamp();
+
+            mTimer = new CountDownTimer(chatTime * 1000, 1000) {
+
+                @Override
+                public void onTick(long l) {
+                    text[0] = String.format("Match: %s (time: %02d)", mMatch.getUser().getName(), l);
+                    mBinding.matchedWithName.setText(text[0]);
+                }
+
+                @Override
+                public void onFinish() {
+
+                }
+            }.start();
+            text[0] = String.format("Match: %s (time: %02d)", mMatch.getUser().getName(), chatTime);
+            mBinding.matchedWithName.setText(text[0]);
+        }
+
     }
 }

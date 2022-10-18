@@ -8,6 +8,7 @@ import com.cclcgb.lso.models.User;
 public class OnMatchMessage implements ILSOSerializable {
     private User mUser;
     private long mStartTimestamp;
+    private long mEndTimestamp;
     private int mMaxChatTimeInSeconds;
 
     @Override
@@ -18,6 +19,7 @@ public class OnMatchMessage implements ILSOSerializable {
         try {
             mUser = reader.readSerializable(new User());
             mStartTimestamp = reader.readLong();
+            mEndTimestamp = reader.readLong();
             mMaxChatTimeInSeconds = reader.readInt();
         } catch(Exception e) {
             e.printStackTrace();
@@ -31,6 +33,9 @@ public class OnMatchMessage implements ILSOSerializable {
 
     public long getStartTimestamp() {
         return mStartTimestamp;
+    }
+    public long getEndTimestamp() {
+        return mEndTimestamp;
     }
 
     public int getMaxChatTimeInSeconds() {
