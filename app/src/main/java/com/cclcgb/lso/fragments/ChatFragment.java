@@ -90,6 +90,11 @@ public class ChatFragment extends Fragment {
             publishMessage("Waiting for new match...", -1);
 
             setMatch(null);
+        } else if(message.getTag() == Tags.ChatTimeoutTag) {
+            publishMessage("Chat timed out...", -1);
+            publishMessage("Waiting for new match...", -1);
+
+            setMatch(null);
         }
     }
 
@@ -149,13 +154,11 @@ public class ChatFragment extends Fragment {
         final String[] text = {"Match: waiting"};
 
         if(mMatch != null) {
-            long chatTime = match.getEndTimestamp() - match.getStartTimestamp();
-
-            mTimer = new CountDownTimer(chatTime * 1000, 1000) {
+            mTimer = new CountDownTimer(mMatch.getMaxChatTimeInSeconds() * 1000L, 1000) {
 
                 @Override
                 public void onTick(long l) {
-                    text[0] = String.format("Match: %s (time: %02d)", mMatch.getUser().getName(), l);
+                    text[0] = String.format("Match: %s (time: %02d)", mMatch.getUser().getName(), l / 1000);
                     mBinding.matchedWithName.setText(text[0]);
                 }
 
@@ -164,8 +167,10 @@ public class ChatFragment extends Fragment {
 
                 }
             }.start();
-            text[0] = String.format("Match: %s (time: %02d)", mMatch.getUser().getName(), chatTime);
+            text[0] = String.format("Match: %s (time: %02d)", mMatch.getUser().getName(), mMatch.getMaxChatTimeInSeconds());
             mBinding.matchedWithName.setText(text[0]);
+        } else {
+            mBinding.matchedWithName.setText("Waiting for match...");
         }
 
     }

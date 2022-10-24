@@ -25,4 +25,6 @@ public class Tags {
     public static short LeaveRoom = 14;
     public static short LeaveChat = 15;
 
+    public static short ChatTimeoutTag = 16;
+
 }
