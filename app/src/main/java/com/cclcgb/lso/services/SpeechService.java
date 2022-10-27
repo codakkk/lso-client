@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,8 +25,10 @@ public class SpeechService implements RecognitionListener {
         mSpeechRecognizer.setRecognitionListener(this);
 
         mIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        mIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        mIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        mIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        mIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ITALY);
+        mIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, Locale.ITALY);
+        mIntent.putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, Locale.ITALY);
     }
 
     public void startListening() {
@@ -75,7 +78,8 @@ public class SpeechService implements RecognitionListener {
 
     @Override
     public void onError(int error) {
-
+        mSpeechListener.onError();
+        Log.e("SpeechService", "Speech service error: " + error);
     }
 
     @Override

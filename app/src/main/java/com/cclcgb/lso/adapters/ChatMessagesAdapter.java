@@ -63,29 +63,20 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter {
 
         if(holder.getClass() == SentViewHolder.class){
             SentViewHolder viewHolder = (SentViewHolder) holder;
-            // long time = message.getTimestamp();
-            // SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
 
             if(chatMessage.getMessage().equals("Photo")) {
-                viewHolder.mBinding.image.setVisibility(View.VISIBLE);
                 viewHolder.mBinding.chatMessage.setVisibility(View.GONE);
             }
-            // viewHolder.binding.messageTime.setText(dateFormat.format(new Date(time)));
             viewHolder.mBinding.chatMessage.setText(chatMessage.getMessage());
 
         } else if(holder instanceof ReceiverViewHolder) {
             ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
-            // long time = message.getTimestamp();
-            // SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
 
-            // viewHolder.binding.messageTime.setText(dateFormat.format(new Date(time)));
             viewHolder.mBinding.chatMessage.setText(chatMessage.getMessage());
 
         } else if(holder instanceof ServerViewHolder) {
             ServerViewHolder viewHolder = (ServerViewHolder) holder;
-            // long time = message.getTimestamp();
-            // SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
-            // viewHolder.binding.messageTime.setText(dateFormat.format(new Date(time)));
+
             viewHolder.mBinding.chatMessage.setText(chatMessage.getMessage());
         }
     }

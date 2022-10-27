@@ -42,11 +42,8 @@ public class RoomsFragment extends Fragment {
                              Bundle savedInstanceState) {
         mBinding = FragmentRoomsBinding.inflate(inflater, container, false);
 
-
-        mBinding.userRecyclerView.showShimmerAdapter();
-
         mRoomsAdapter = new RoomsAdapter(getContext(), mRooms, this::onRoomClicked);
-        mBinding.userRecyclerView.setAdapter(mRoomsAdapter);
+        mBinding.roomsRecyclerView.setAdapter(mRoomsAdapter);
 
         LSOMessage requestRooms = LSOMessage.CreateEmpty(Tags.RequestRoomsTag);
         APIManager.send(requestRooms);
@@ -54,20 +51,6 @@ public class RoomsFragment extends Fragment {
         APIManager.addMessageReceivedListener(this::onMessageReceived);
 
         return mBinding.getRoot();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        // String currentId = FirebaseAuth.getInstance().getUid();
-        //database.getReference().child("presence").child(currentId).setValue("Online");
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        // String currentId = FirebaseAuth.getInstance().getUid();
-        //database.getReference().child("presence").child(currentId).setValue("Offline");
     }
 
     private void onMessageReceived(LSOMessage message) {

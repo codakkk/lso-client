@@ -29,7 +29,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.MyViewHolder
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull  ViewGroup parent, int viewType) {
-        View view =  LayoutInflater.from(mContext).inflate(R.layout.room_layout, parent, false);
+        View view =  LayoutInflater.from(mContext).inflate(R.layout.item_room, parent, false);
         return new MyViewHolder(view);
     }
 
