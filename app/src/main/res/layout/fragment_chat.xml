@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg"
-    tools:context=".activities.ChatActivity">
+    android:background="@drawable/bg">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar2"
@@ -96,7 +95,7 @@
 
             <EditText
                 android:id="@+id/inputMessage"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="8dp"
@@ -107,13 +106,20 @@
                 android:background="@android:color/transparent"
                 android:ems="10"
                 android:fontFamily="@font/poppins"
-                android:hint="Type a chatMessage..."
+                android:hint="Type a message..."
                 android:inputType="textPersonName"
                 android:padding="8dp"
                 android:textColor="@color/black"
                 android:textColorHint="#999999"
                 android:textSize="16sp" />
-
+            <ImageView
+                android:id="@+id/speech"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="12dp"
+                app:srcCompat="@drawable/ic_mic"
+                app:tint="#777777"
+                android:contentDescription="Starts speech recognition" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -122,14 +128,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:background="@drawable/circle_green"
         android:padding="10dp"
-        android:tint="@color/white"
         app:layout_constraintBottom_toBottomOf="@+id/cardView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/cardView"
-        app:srcCompat="@drawable/ic_send" />
+        app:srcCompat="@drawable/ic_send"
+        app:tint="@color/white" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chatRecyclerView"

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
+import com.cclcgb.lso.R;
 import com.cclcgb.lso.adapters.ChatMessagesAdapter;
 import com.cclcgb.lso.api.APIManager;
 import com.cclcgb.lso.api.LSOMessage;
@@ -22,14 +24,17 @@ import com.cclcgb.lso.api.messages.SendMessage;
 import com.cclcgb.lso.databinding.FragmentChatBinding;
 import com.cclcgb.lso.models.ChatMessage;
 import com.cclcgb.lso.models.User;
+import com.cclcgb.lso.services.ISpeechListener;
+import com.cclcgb.lso.services.SpeechService;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class ChatFragment extends Fragment {
+public class ChatFragment extends Fragment implements ISpeechListener {
     private FragmentChatBinding mBinding;
     private ChatMessagesAdapter mAdapter;
+    private SpeechService mSpeechService;
 
     private OnMatchMessage mMatch;
 
@@ -60,6 +65,20 @@ public class ChatFragment extends Fragment {
         mBinding.backButton.setOnClickListener(this::onBackButton);
 
         mBinding.newMatch.setOnClickListener(this::onRequestNewMatch);
+
+        mSpeechService = new SpeechService(getContext());
+        mSpeechService.setSpeechListener(this);
+
+        mBinding.speech.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP){
+                mSpeechService.stopListening();
+            }
+            else if (event.getAction() == MotionEvent.ACTION_DOWN){
+                mBinding.speech.setImageResource(R.drawable.ic_mic);
+                mSpeechService.startListening();
+            }
+            return false;
+        });
 
         return mBinding.getRoot();
     }
@@ -173,5 +192,34 @@ public class ChatFragment extends Fragment {
             mBinding.matchedWithName.setText("Waiting for match...");
         }
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        mSpeechService.dispose();
+    }
+
+    @Override
+    public void onBegin() {
+        mBinding.inputMessage.setText("");
+        mBinding.inputMessage.setHint("Listening...");
+    }
+
+    @Override
+    public void onError() {
+        mBinding.inputMessage.setHint("Type a message...");
+    }
+
+    @Override
+    public void onFinish(List<String> results) {
+        mBinding.inputMessage.setHint("Type a message...");
+
+        if(results.size() == 0) {
+            return;
+        }
+
+        mBinding.inputMessage.setText(results.get(0));
     }
 }

@@ -1,36 +1,34 @@
 package com.cclcgb.lso.activities;
 
-import android.content.Intent;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
-import com.cclcgb.lso.adapters.HomeAdapter;
 import com.cclcgb.lso.R;
 import com.cclcgb.lso.api.APIManager;
-import com.cclcgb.lso.api.LSOMessage;
-import com.cclcgb.lso.api.Tags;
-import com.cclcgb.lso.api.messages.FirstConfigurationMessage;
 import com.cclcgb.lso.databinding.ActivityMainBinding;
-import com.cclcgb.lso.fragments.LoginFragmentDirections;
 
 public class MainActivity extends AppCompatActivity {
-    ActivityMainBinding binding;
+    public static final Integer RecordAudioRequestCode = 1;
+
+    ActivityMainBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        mBinding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(mBinding.getRoot());
 
         APIManager.init(this);
         APIManager.enableDebug();
 
-
-        binding.toolbar.setOnMenuItemClickListener(item -> {
+        mBinding.toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.logout) {
                 //auth.signOut();
                 //startActivity(new Intent(MainActivity.this, PhoneNumberActivity.class));
@@ -39,7 +37,9 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.RECORD_AUDIO}, RecordAudioRequestCode);
+        }
     }
 
     @Override
@@ -49,5 +49,14 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, PhoneNumberActivity.class));
             finish();
         }*/
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == RecordAudioRequestCode && grantResults.length > 0 ){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                Toast.makeText(this,"Permission Granted", Toast.LENGTH_SHORT).show();
+        }
     }
 }
