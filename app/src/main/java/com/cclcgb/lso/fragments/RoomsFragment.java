@@ -2,6 +2,8 @@ package com.cclcgb.lso.fragments;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,9 +11,11 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.cclcgb.lso.api.APIManager;
 import com.cclcgb.lso.api.LSOMessage;
@@ -49,6 +53,24 @@ public class RoomsFragment extends Fragment {
         APIManager.send(requestRooms);
 
         APIManager.addMessageReceivedListener(this::onMessageReceived);
+
+        mBinding.addChat.setOnClickListener((v) -> {
+            Context ctx = requireContext();
+            AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+            builder.setTitle("Crea stanza");
+
+            final EditText input = new EditText(ctx);
+            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            builder.setView(input);
+
+            builder.setPositiveButton("Crea", (dialog, which) -> {
+                String name = input.getText().toString();
+
+            });
+            builder.setNegativeButton("Chiudi", (dialog, which) -> dialog.cancel());
+
+            builder.show();
+        });
 
         return mBinding.getRoot();
     }

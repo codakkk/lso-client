@@ -1,6 +1,7 @@
 package com.cclcgb.lso.api;
 
 import android.os.StrictMode;
+import android.util.Log;
 
 import com.cclcgb.lso.activities.MainActivity;
 
@@ -16,34 +17,27 @@ import java.util.List;
 
 public class APIManager implements Runnable{
 
-    private static final String ServerIP = "10.0.2.2";
-    private static final int Port = 4444;
+    private static final String ServerIP = "172.28.175.188";
+    private static final int Port = 5555;
 
     private static final APIManager mInstance = new APIManager();
-
-    private String mName;
 
     private Thread mThread;
     private Socket mSocket;
 
     private DataOutputStream mWriter;
 
-    private MainActivity mActivity;
-
     private final List<IOnMessageReceived> mCallbacks = new ArrayList<>();
 
     private final List<IOnConnectionClose> mOnConnectionCloseCallback = new ArrayList<>();
 
-    private APIManager() {
-    }
+    private APIManager() {}
 
     public static void enableDebug() {
         addMessageReceivedListener((System.out::println));
     }
 
-    public static void init(MainActivity mainActivity) {
-        mInstance.mActivity = mainActivity;
-
+    public static void init() {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
@@ -60,7 +54,13 @@ public class APIManager implements Runnable{
             mSocket = new Socket(InetAddress.getByName(ServerIP), Port);
             mWriter = new DataOutputStream(mSocket.getOutputStream());
 
-            byte[] bytes = new byte[1024];
+            if(mSocket.isConnected()) {
+                Log.i("APIManager", "Connected to server");
+            } else {
+                Log.e("APIManager", "Cannot connected to server");
+            }
+
+            byte[] bytes = new byte[2048];
             while(mInstance.mSocket.isConnected()) {
                 int size = mSocket.getInputStream().read(bytes);
 
@@ -76,21 +76,16 @@ public class APIManager implements Runnable{
                 Arrays.fill(bytes, (byte) 0);
             }
 
-            mInstance.mActivity.runOnUiThread(() -> mInstance.mOnConnectionCloseCallback.forEach(IOnConnectionClose::onClose));
+            MainActivity.Instance.runOnUiThread(() -> mInstance.mOnConnectionCloseCallback.forEach(IOnConnectionClose::onClose));
 
             mSocket.close();
         } catch(Exception e) {
             e.printStackTrace();
+            Log.e("APIManager", "Error: " + e.getMessage());
         }
     }
 
-    // Connects to server with @name
-    public static void connect(String name) {
-        if(name == null || name.length() < 3) {
-            return;
-        }
-
-        mInstance.mName = name;
+    public static void connect() {
         mInstance.mThread = new Thread(mInstance);
         mInstance.mThread.start();
     }
@@ -114,7 +109,7 @@ public class APIManager implements Runnable{
     }
 
     private static void dispatchOnMessageReceived(LSOMessage message) {
-        mInstance.mActivity.runOnUiThread(() -> mInstance.mCallbacks.forEach((e) -> e.onMessageReceived(message)));
+        MainActivity.Instance.runOnUiThread(() -> mInstance.mCallbacks.forEach((e) -> e.onMessageReceived(message)));
     }
 
     public static void addOnConnectionClosedListener(IOnConnectionClose c) {

@@ -21,6 +21,9 @@
         <action
             android:id="@+id/action_loginFragment_to_roomsFragment"
             app:destination="@id/roomsFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_signUpFragment"
+            app:destination="@id/signUpFragment" />
     </fragment>
     <fragment
         android:id="@+id/chatFragment"
@@ -35,5 +38,12 @@
         <argument
             android:name="roomName"
             app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/signUpFragment"
+        android:name="com.cclcgb.lso.fragments.SignUpFragment">
+        <action
+            android:id="@+id/action_signUpFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
     </fragment>
 </navigation>

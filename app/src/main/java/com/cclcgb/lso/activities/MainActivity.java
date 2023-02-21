@@ -17,16 +17,16 @@ import com.cclcgb.lso.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
     public static final Integer RecordAudioRequestCode = 1;
 
+    public static MainActivity Instance;
+
     ActivityMainBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Instance = this;
         mBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mBinding.getRoot());
-
-        APIManager.init(this);
-        APIManager.enableDebug();
 
         mBinding.toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.logout) {

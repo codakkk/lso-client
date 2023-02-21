@@ -27,4 +27,11 @@ public class Tags {
 
     public static short ChatTimeoutTag = 16;
 
+    public static short SignUpRequestedTag = 20;
+    public static short SignUpAcceptedTag = 21;
+    public static short SignUpRejectedTag = 22;
+
+    public static short SignInRequestedTag = 30;
+    public static short SignInAcceptedTag = 31;
+    public static short SignInRejectedTag = 32;
 }
