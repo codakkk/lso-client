@@ -14,10 +14,13 @@ import androidx.navigation.Navigation;
 
 import com.cclcgb.lso.api.APIManager;
 import com.cclcgb.lso.api.LSOMessage;
+import com.cclcgb.lso.api.LSOReader;
 import com.cclcgb.lso.api.Tags;
 import com.cclcgb.lso.api.messages.FirstConfigurationMessage;
 import com.cclcgb.lso.api.messages.SignInMessage;
 import com.cclcgb.lso.databinding.FragmentLoginBinding;
+
+import java.io.StreamCorruptedException;
 
 public class LoginFragment extends Fragment {
     FragmentLoginBinding mBinding;
@@ -40,6 +43,10 @@ public class LoginFragment extends Fragment {
             String username = mBinding.username.getText().toString();
             String password = mBinding.password.getText().toString();
 
+            if(username.length() == 0 || password.length() == 0) {
+                return;
+            }
+
             LSOMessage m = LSOMessage.Create(Tags.SignInRequestedTag, new SignInMessage(username, password));
             APIManager.send(m);
         });
@@ -53,6 +60,13 @@ public class LoginFragment extends Fragment {
                         .show();
             }
             else if(message.getTag() == Tags.SignInAcceptedTag) {
+                LSOReader reader = message.getReader();
+                try {
+                    int id = reader.readInt();
+                    APIManager.setUserId(id);
+                } catch (StreamCorruptedException e) {
+                    e.printStackTrace();
+                }
                 NavDirections dir = LoginFragmentDirections.actionLoginFragmentToRoomsFragment();
                 Navigation.findNavController(requireView()).navigate(dir);
             }

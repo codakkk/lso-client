@@ -21,9 +21,9 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter {
     Context mContext;
     List<ChatMessage> mChatMessages;
 
-    final int ITEM_SENT = 1;
-    final int ITEM_RECEIVE = 2;
-    final int ITEM_SERVER = 3;
+    final static int ITEM_SENT = 1;
+    final static int ITEM_RECEIVE = 2;
+    final static int ITEM_SERVER = 3;
 
     public ChatMessagesAdapter(Context mContext, List<ChatMessage> chatMessages) {
         this.mContext = mContext;

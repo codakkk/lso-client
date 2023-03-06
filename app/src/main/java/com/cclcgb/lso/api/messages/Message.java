@@ -3,13 +3,15 @@ package com.cclcgb.lso.api.messages;
 import com.cclcgb.lso.api.LSOReader;
 import com.cclcgb.lso.api.LSOWriter;
 import com.cclcgb.lso.models.ILSOSerializable;
+import com.cclcgb.lso.models.User;
 
-public class SendMessage implements ILSOSerializable {
+public class Message implements ILSOSerializable {
+    private User mUser;
     private String mMessage;
 
-    public SendMessage() {}
+    public Message() {}
 
-    public SendMessage(String message) {
+    public Message(String message) {
         mMessage = message;
     }
 
@@ -21,6 +23,7 @@ public class SendMessage implements ILSOSerializable {
     @Override
     public void Deserialize(LSOReader reader) {
         try {
+            mUser = reader.readSerializable(new User());
             mMessage = reader.readString();
         }
         catch(Exception e) {
@@ -28,6 +31,7 @@ public class SendMessage implements ILSOSerializable {
         }
     }
 
+    public User getUser() { return mUser; }
     public String getMessage() {
         return mMessage;
     }

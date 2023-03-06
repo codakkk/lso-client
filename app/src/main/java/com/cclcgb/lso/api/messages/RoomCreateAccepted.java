@@ -7,9 +7,10 @@ import com.cclcgb.lso.models.Room;
 
 import java.io.StreamCorruptedException;
 
-public class JoinRoomAcceptedMessage implements ILSOSerializable {
-
+public class RoomCreateAccepted implements ILSOSerializable {
     private Room mRoom;
+
+    public Room getRoom() { return mRoom; }
 
     @Override
     public void Serialize(LSOWriter writer) {}
@@ -17,9 +18,5 @@ public class JoinRoomAcceptedMessage implements ILSOSerializable {
     @Override
     public void Deserialize(LSOReader reader) {
         mRoom = reader.readSerializable(new Room());
-    }
-
-    public Room getRoom() {
-        return mRoom;
     }
 }

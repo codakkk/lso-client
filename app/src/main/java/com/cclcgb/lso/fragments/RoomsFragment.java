@@ -21,9 +21,12 @@ import com.cclcgb.lso.api.APIManager;
 import com.cclcgb.lso.api.LSOMessage;
 import com.cclcgb.lso.api.LSOReader;
 import com.cclcgb.lso.api.Tags;
+import com.cclcgb.lso.api.messages.CreateRoomMessage;
 import com.cclcgb.lso.api.messages.JoinRoomAcceptedMessage;
 import com.cclcgb.lso.api.messages.JoinRoomMessage;
 import com.cclcgb.lso.api.messages.JoinRoomRefusedMessage;
+import com.cclcgb.lso.api.messages.RequestRoomsAccepted;
+import com.cclcgb.lso.api.messages.RoomCreateAccepted;
 import com.cclcgb.lso.databinding.FragmentRoomsBinding;
 import com.cclcgb.lso.models.Room;
 
@@ -36,7 +39,7 @@ import java.util.Objects;
 public class RoomsFragment extends Fragment {
     FragmentRoomsBinding mBinding;
 
-    private final List<Room> mRooms = new ArrayList<>();
+    private static final List<Room> mRooms = new ArrayList<>();
     RoomsAdapter mRoomsAdapter;
 
     ProgressDialog dialog;
@@ -49,7 +52,7 @@ public class RoomsFragment extends Fragment {
         mRoomsAdapter = new RoomsAdapter(getContext(), mRooms, this::onRoomClicked);
         mBinding.roomsRecyclerView.setAdapter(mRoomsAdapter);
 
-        LSOMessage requestRooms = LSOMessage.CreateEmpty(Tags.RequestRoomsTag);
+        LSOMessage requestRooms = LSOMessage.CreateEmpty(Tags.RequestRooms);
         APIManager.send(requestRooms);
 
         APIManager.addMessageReceivedListener(this::onMessageReceived);
@@ -66,6 +69,8 @@ public class RoomsFragment extends Fragment {
             builder.setPositiveButton("Crea", (dialog, which) -> {
                 String name = input.getText().toString();
 
+                LSOMessage message = LSOMessage.Create(Tags.RoomCreateRequested, new CreateRoomMessage(name));
+                APIManager.send(message);
             });
             builder.setNegativeButton("Chiudi", (dialog, which) -> dialog.cancel());
 
@@ -79,14 +84,20 @@ public class RoomsFragment extends Fragment {
         short tag = message.getTag();
         LSOReader reader = message.getReader();
 
-        if(tag == Tags.RoomTag) {
-            while(reader.getPosition() < reader.getLength())
-            {
-                Room room = new Room();
-                room.Deserialize(reader);
+        if(tag == Tags.RoomCreateAccepted) {
+            RoomCreateAccepted roomCreateAccepted = reader.readSerializable(new RoomCreateAccepted());
+            Room room = roomCreateAccepted.getRoom();
 
-                mRooms.add(room);
+            View view = getView();
+            if(view != null) {
+                NavDirections dir = RoomsFragmentDirections.actionRoomsFragmentToChatFragment(room.getId(), room.getName());
+                Navigation.findNavController(view).navigate(dir);
             }
+        } else if(tag == Tags.RequestRoomsAccepted) {
+            RequestRoomsAccepted requestRoomsAccepted = reader.readSerializable(new RequestRoomsAccepted());
+
+            mRooms.clear();
+            mRooms.addAll(requestRoomsAccepted.getRooms());
 
             mRoomsAdapter.notifyItemRangeChanged(0, mRooms.size()-1);
         } else if(tag == Tags.JoinRoomAcceptedTag) {
@@ -107,20 +118,11 @@ public class RoomsFragment extends Fragment {
     }
 
     private void onJoinRoomAccepted(JoinRoomAcceptedMessage message) {
-        System.out.println("Accepted in room " + message.getRoomId());
+        Room room = message.getRoom();
+        System.out.println("Accepted in room " + room.getId());
         View view = getView();
         if(view != null) {
-            Room room = null;
-
-            for(Room r : mRooms) {
-                if(r.getId() != message.getRoomId()) continue;
-                room = r;
-                break;
-            }
-
-            Objects.requireNonNull(room);
-
-            NavDirections dir = RoomsFragmentDirections.actionRoomsFragmentToChatFragment(message.getRoomId(), room.getName());
+            NavDirections dir = RoomsFragmentDirections.actionRoomsFragmentToChatFragment(room.getId(), room.getName());
             Navigation.findNavController(view).navigate(dir);
         }
     }
@@ -128,7 +130,7 @@ public class RoomsFragment extends Fragment {
     private void onJoinRoomRefused(JoinRoomRefusedMessage message) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Rejected")
-                .setMessage("Room is full")
+                .setMessage("Room " + message.getRoomName() + "is full")
                 .setPositiveButton(android.R.string.ok, null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();

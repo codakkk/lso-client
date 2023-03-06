@@ -17,7 +17,7 @@ import java.util.List;
 
 public class APIManager implements Runnable{
 
-    private static final String ServerIP = "172.28.175.188";
+    private static final String ServerIP = "172.25.114.45";
     private static final int Port = 5555;
 
     private static final APIManager mInstance = new APIManager();
@@ -26,6 +26,8 @@ public class APIManager implements Runnable{
     private Socket mSocket;
 
     private DataOutputStream mWriter;
+
+    private int mUserId;
 
     private final List<IOnMessageReceived> mCallbacks = new ArrayList<>();
 
@@ -120,4 +122,11 @@ public class APIManager implements Runnable{
         mInstance.mOnConnectionCloseCallback.remove(c);
     }
 
+    public static int getUserId() {
+        return mInstance.mUserId;
+    }
+
+    public static void setUserId(int id) {
+        mInstance.mUserId = id;
+    }
 }

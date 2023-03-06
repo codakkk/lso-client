@@ -6,26 +6,28 @@ import com.cclcgb.lso.models.ILSOSerializable;
 
 import java.io.StreamCorruptedException;
 
-public class JoinRoomRefusedMessage implements ILSOSerializable {
+public class CreateRoomMessage implements ILSOSerializable {
+    private String name;
 
-    private int mRoomId;
-    private String mRoomName;
+    public CreateRoomMessage(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     @Override
-    public void Serialize(LSOWriter writer) {}
+    public void Serialize(LSOWriter writer) {
+        writer.write(name);
+    }
 
     @Override
     public void Deserialize(LSOReader reader) {
         try {
-            mRoomId = reader.readInt();
-            mRoomName = reader.readString();
+            name = reader.readString();
         } catch (StreamCorruptedException e) {
             e.printStackTrace();
         }
     }
-
-    public int getRoomId() {
-        return mRoomId;
-    }
-    public String getRoomName() { return mRoomName; }
 }
