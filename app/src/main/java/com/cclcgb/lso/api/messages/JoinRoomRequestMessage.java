@@ -6,10 +6,10 @@ import com.cclcgb.lso.models.ILSOSerializable;
 
 import java.io.StreamCorruptedException;
 
-public class JoinRoomMessage implements ILSOSerializable {
+public class JoinRoomRequestMessage implements ILSOSerializable {
     private int mId;
 
-    public JoinRoomMessage(int id) {
+    public JoinRoomRequestMessage(int id) {
         mId = id;
     }
 

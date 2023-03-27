@@ -1,6 +1,7 @@
 package com.cclcgb.lso.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,25 +10,36 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cclcgb.lso.R;
+import com.cclcgb.lso.api.APIManager;
+import com.cclcgb.lso.databinding.ItemJoinRequestBinding;
 import com.cclcgb.lso.databinding.ItemReceiveBinding;
 import com.cclcgb.lso.databinding.ItemSentBinding;
 import com.cclcgb.lso.databinding.ItemServerBinding;
 import com.cclcgb.lso.models.ChatMessage;
+import com.cclcgb.lso.models.ChatMessageJoinRequestState;
+import com.cclcgb.lso.models.ChatMessageType;
+import com.cclcgb.lso.models.User;
 
 import java.util.List;
 
 public class ChatMessagesAdapter extends RecyclerView.Adapter {
 
-    Context mContext;
-    List<ChatMessage> mChatMessages;
+    private Context mContext;
+    private List<ChatMessage> mChatMessages;
+
+    private IChatMessageJoinRequestCallback mCallback;
 
     final static int ITEM_SENT = 1;
     final static int ITEM_RECEIVE = 2;
     final static int ITEM_SERVER = 3;
+    final static int ITEM_JOIN_REQUEST = 4;
 
-    public ChatMessagesAdapter(Context mContext, List<ChatMessage> chatMessages) {
+
+
+    public ChatMessagesAdapter(Context mContext, List<ChatMessage> chatMessages, IChatMessageJoinRequestCallback callback) {
         this.mContext = mContext;
         this.mChatMessages = chatMessages;
+        this.mCallback = callback;
     }
 
     @NonNull
@@ -40,6 +52,9 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter {
         else if(viewType == ITEM_SERVER) {
             ItemServerBinding binding = ItemServerBinding.inflate(LayoutInflater.from(mContext), parent, false);
             return new ServerViewHolder(binding);
+        } else if(viewType == ITEM_JOIN_REQUEST) {
+            ItemJoinRequestBinding binding = ItemJoinRequestBinding.inflate(LayoutInflater.from(mContext), parent, false);
+            return new ItemJoinRequestViewHolder(binding);
         }
         ItemReceiveBinding binding = ItemReceiveBinding.inflate(LayoutInflater.from(mContext), parent, false);
         return new ReceiverViewHolder(binding);
@@ -48,36 +63,51 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         ChatMessage chatMessage = mChatMessages.get(position);
-        if(chatMessage.getSenderId() == -1) {
-            return ITEM_SERVER;
-        }
-        else if(chatMessage.getSenderId() == 0) {
+        if(chatMessage.getType() == ChatMessageType.Sent) {
             return ITEM_SENT;
+        } else if(chatMessage.getType() == ChatMessageType.Received) {
+            return ITEM_RECEIVE;
+        } else if(chatMessage.getType() == ChatMessageType.JoinRequest) {
+            return ITEM_JOIN_REQUEST;
         }
-        return ITEM_RECEIVE;
+        return ITEM_SERVER;
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ChatMessage chatMessage = mChatMessages.get(position);
 
-        if(holder.getClass() == SentViewHolder.class){
-            SentViewHolder viewHolder = (SentViewHolder) holder;
+        if(holder instanceof SentViewHolder viewHolder){
+            viewHolder.mBinding.chatMessage.setText(chatMessage.getMessage());
 
-            if(chatMessage.getMessage().equals("Photo")) {
-                viewHolder.mBinding.chatMessage.setVisibility(View.GONE);
+        } else if(holder instanceof ReceiverViewHolder viewHolder) {
+            viewHolder.mBinding.nickname.setTextColor(Color.RED);
+            viewHolder.mBinding.nickname.setText(chatMessage.getUser().getName());
+            viewHolder.mBinding.chatMessage.setText(chatMessage.getMessage());
+
+        } else if(holder instanceof ServerViewHolder viewHolder) {
+            viewHolder.mBinding.chatMessage.setText(chatMessage.getMessage());
+        } else if(holder instanceof ItemJoinRequestViewHolder viewHolder) {
+            switch (chatMessage.getRequestState()) {
+                case Waiting -> {
+                    viewHolder.mBinding.btnReject.setVisibility(View.VISIBLE);
+                    viewHolder.mBinding.btnAccept.setVisibility(View.VISIBLE);
+                    viewHolder.mBinding.btnAccept.setOnClickListener((v) -> mCallback.onAccept(position, chatMessage));
+                    viewHolder.mBinding.btnReject.setOnClickListener((v) -> mCallback.onReject(position, chatMessage));
+                    viewHolder.mBinding.chatMessage.setText(chatMessage.getUser().getName() + " vuole entrare. Accetti?");
+                }
+                case Accepted, Rejected -> {
+                    viewHolder.mBinding.btnReject.setVisibility(View.GONE);
+                    viewHolder.mBinding.btnAccept.setVisibility(View.GONE);
+                    viewHolder.mBinding.btnReject.setOnClickListener(null);
+                    viewHolder.mBinding.btnAccept.setOnClickListener(null);
+                    String message = "Hai accettato " + chatMessage.getUser().getName() + ".";
+                    if (chatMessage.getRequestState() == ChatMessageJoinRequestState.Rejected) {
+                        message = "Hai rifiutato " + chatMessage.getUser().getName() + ".";
+                    }
+                    viewHolder.mBinding.chatMessage.setText(message);
+                }
             }
-            viewHolder.mBinding.chatMessage.setText(chatMessage.getMessage());
-
-        } else if(holder instanceof ReceiverViewHolder) {
-            ReceiverViewHolder viewHolder = (ReceiverViewHolder) holder;
-
-            viewHolder.mBinding.chatMessage.setText(chatMessage.getMessage());
-
-        } else if(holder instanceof ServerViewHolder) {
-            ServerViewHolder viewHolder = (ServerViewHolder) holder;
-
-            viewHolder.mBinding.chatMessage.setText(chatMessage.getMessage());
         }
     }
 
@@ -108,5 +138,18 @@ public class ChatMessagesAdapter extends RecyclerView.Adapter {
             super(binding.getRoot());
             mBinding = binding;
         }
+    }
+
+    public static class ItemJoinRequestViewHolder extends RecyclerView.ViewHolder {
+        ItemJoinRequestBinding mBinding;
+        public ItemJoinRequestViewHolder(@NonNull ItemJoinRequestBinding binding) {
+            super(binding.getRoot());
+            mBinding = binding;
+        }
+    }
+
+    public interface IChatMessageJoinRequestCallback {
+        void onAccept(int position, ChatMessage message);
+        void onReject(int position, ChatMessage message);
     }
 }

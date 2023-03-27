@@ -1,39 +1,49 @@
 package com.cclcgb.lso.models;
 
 public class ChatMessage {
-    private String messageId;
-    private String message;
-    private int senderId;
+    private ChatMessageType mType;
+    private User mUser;
+    private String mMessage;
 
-    public ChatMessage(String message, int senderId) {
-        this.message = message;
-        this.senderId = senderId;
+    private int mColor;
+
+    private ChatMessageJoinRequestState mRequestState;
+
+    public ChatMessage(ChatMessageType type, User user, String message, int color) {
+        this();
+        mType = type;
+        mUser = user;
+        mMessage = message;
+        mColor = color;
     }
 
     public ChatMessage() {
-    }
-
-    public String getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(String messageId) {
-        this.messageId = messageId;
+        mRequestState = ChatMessageJoinRequestState.Waiting;
     }
 
     public String getMessage() {
-        return message;
+        return mMessage;
     }
 
     public void setMessage(String message) {
-        this.message = message;
+        mMessage = message;
     }
 
-    public int getSenderId() {
-        return senderId;
+    public User getUser() {
+        return mUser;
+    }
+    public int getColor() {
+        return mColor;
     }
 
-    public void setSenderId(int senderId) {
-        this.senderId = senderId;
+    public ChatMessageType getType() {
+        return mType;
+    }
+    public ChatMessageJoinRequestState getRequestState() {
+        return mRequestState;
+    }
+
+    public void setRequestState(ChatMessageJoinRequestState state) {
+        mRequestState = state;
     }
 }

@@ -4,6 +4,7 @@ import android.os.StrictMode;
 import android.util.Log;
 
 import com.cclcgb.lso.activities.MainActivity;
+import com.cclcgb.lso.models.User;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -17,7 +18,7 @@ import java.util.List;
 
 public class APIManager implements Runnable{
 
-    private static final String ServerIP = "172.25.114.45";
+    private static final String ServerIP = "172.21.198.191";
     private static final int Port = 5555;
 
     private static final APIManager mInstance = new APIManager();
@@ -27,7 +28,7 @@ public class APIManager implements Runnable{
 
     private DataOutputStream mWriter;
 
-    private int mUserId;
+    private User mUser;
 
     private final List<IOnMessageReceived> mCallbacks = new ArrayList<>();
 
@@ -93,6 +94,10 @@ public class APIManager implements Runnable{
     }
 
     public static void send(LSOMessage message) {
+        if(mInstance.mWriter == null) {
+            return;
+        }
+
         try {
             MessageBuffer messageBuffer = message.toBuffer();
 
@@ -122,11 +127,11 @@ public class APIManager implements Runnable{
         mInstance.mOnConnectionCloseCallback.remove(c);
     }
 
-    public static int getUserId() {
-        return mInstance.mUserId;
+    public static User getUser() {
+        return mInstance.mUser;
     }
 
-    public static void setUserId(int id) {
-        mInstance.mUserId = id;
+    public static void setUser(User user) {
+        mInstance.mUser = user;
     }
 }

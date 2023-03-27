@@ -3,23 +3,24 @@ package com.cclcgb.lso.api.messages;
 import com.cclcgb.lso.api.LSOReader;
 import com.cclcgb.lso.api.LSOWriter;
 import com.cclcgb.lso.models.ILSOSerializable;
-import com.cclcgb.lso.models.Room;
+import com.cclcgb.lso.models.User;
 
 import java.io.StreamCorruptedException;
 
-public class JoinRoomAcceptedMessage implements ILSOSerializable {
-
-    private Room mRoom;
+public class LeaveRoomMessage implements ILSOSerializable {
+    private User mUser;
 
     @Override
-    public void Serialize(LSOWriter writer) {}
+    public void Serialize(LSOWriter writer) {
+
+    }
 
     @Override
     public void Deserialize(LSOReader reader) {
-        mRoom = reader.readSerializable(new Room());
+        mUser = reader.readSerializable(new User());
     }
 
-    public Room getRoom() {
-        return mRoom;
+    public User getUser() {
+        return mUser;
     }
 }

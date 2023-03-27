@@ -26,7 +26,7 @@ public class SignUpFragment extends Fragment {
                              Bundle savedInstanceState) {
         mBinding = FragmentSignupBinding.inflate(inflater, container, false);
 
-        mBinding.orLoginText.setText(Html.fromHtml("Esegui il<font color=#01e675>Login</font>"));
+        mBinding.orLoginText.setText(Html.fromHtml("Esegui il <font color=#01e675>Login</font>"));
         mBinding.orLoginText.setOnClickListener((v) -> {
             NavDirections dir = SignUpFragmentDirections.actionSignUpFragmentToLoginFragment();
             Navigation.findNavController(requireView()).navigate(dir);

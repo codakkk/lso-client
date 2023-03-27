@@ -4,12 +4,14 @@ public class Tags {
     public static short RequestRooms = 2;
     public static short RequestRoomsAccepted = 3;
 
-    public static short JoinRoomTag = 7;
-    public static short JoinRoomAcceptedTag = 8;
-    public static short JoinRoomRefusedTag = 9;
+    public static short JoinRoomRequest = 7;
+    public static short JoinRoomAccepted = 8;
+    public static short JoinRoomRefused = 9;
+    public static short JoinRoomNotifyAccepted = 10;
 
-    public static short MessageTag = 11;
-    public static short RejectSentMessage = 13;
+
+    public static short ReceiveMessage = 11;
+    public static short SendMessage = 12;
 
     public static short LeaveRoomRequested = 14;
     public static short LeaveRoom = 15;
@@ -24,5 +26,7 @@ public class Tags {
 
     public static short RoomCreateRequested = 40;
     public static short RoomCreateAccepted = 41;
-    public static short RoomCreateRejected = 42;
+    public static short RoomClosed = 43;
+
+    public static short JoinRoomRequested = 50;
 }

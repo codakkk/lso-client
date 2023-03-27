@@ -13,6 +13,7 @@ import com.cclcgb.lso.R;
 import com.cclcgb.lso.models.Room;
 
 import java.util.List;
+import java.util.Map;
 
 public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.MyViewHolder> {
     Context mContext;
@@ -37,33 +38,11 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.MyViewHolder
     public void onBindViewHolder(@NonNull RoomsAdapter.MyViewHolder holder, int position) {
         Room room = mRooms.get(position);
 
+        assert room != null;
+
         holder.roomName.setText(room.getName());
         holder.counter.setText(mContext.getString(R.string.counterHint, room.getCount(), room.getMaxCount()));
 
-        /*FirebaseDatabase.getInstance().getReference()
-                .child("chats")
-                .child(senderRoom)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
-                        if(snapshot.exists()){
-                            String lastMsg = snapshot.child("lastMsg").getValue(String.class);
-                            long time = snapshot.child("lastMsgTime").getValue(Long.class);
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
-                            holder.messageTime.setText(dateFormat.format(new Date(time)));
-                            holder.lastMessage.setText(lastMsg);
-                        } else {
-                            holder.lastMessage.setText("Tap to chat");
-                            holder.messageTime.setVisibility(View.INVISIBLE);
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull @NotNull DatabaseError error) {
-
-                    }
-                });*/
         holder.itemView.setOnClickListener(v -> mOnRoomClicked.onClick(room));
     }
 

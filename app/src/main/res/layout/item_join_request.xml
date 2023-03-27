@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:background="@drawable/server_bg"
+        android:background="@drawable/item_join_request_bg"
         android:orientation="vertical"
         android:padding="5dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -26,16 +26,20 @@
             android:paddingTop="0dp"
             android:paddingRight="10dp"
             android:paddingBottom="0dp"
-            android:text="TextView"
+            android:text="zxc vuole unirsi. Accetti?"
             android:textColor="@color/black" />
 
-        <TextView
-            android:id="@+id/counter"
+        <Button
+            android:id="@+id/btnAccept"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="right"
-            android:text="8:00 AM"
-            android:textColor="#999999"
-            android:textSize="10sp" />
+            android:text="Accetta" />
+
+        <Button
+            android:id="@+id/btnReject"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Rifiuta" />
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

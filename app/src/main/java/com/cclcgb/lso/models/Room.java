@@ -4,6 +4,8 @@ import com.cclcgb.lso.api.LSOReader;
 import com.cclcgb.lso.api.LSOWriter;
 
 import java.io.StreamCorruptedException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Room implements ILSOSerializable {
     private int mId;
@@ -12,13 +14,11 @@ public class Room implements ILSOSerializable {
 
     private String mName;
 
-    public Room() {}
+    private User mOwner;
 
-    public Room(int id, int count, String name) {
-        this.mId = id;
-        this.mCount = count;
-        this.mName = name;
-    }
+    private final List<User> mUsers = new ArrayList<>();
+
+    public Room() {}
 
     public int getId() {
         return mId;
@@ -40,6 +40,14 @@ public class Room implements ILSOSerializable {
         return mMaxCount;
     }
 
+    public User getOwner() {
+        return mOwner;
+    }
+
+    public List<User> getUsers() {
+        return mUsers;
+    }
+
     @Override
     public void Serialize(LSOWriter writer) { }
 
@@ -50,7 +58,12 @@ public class Room implements ILSOSerializable {
             mCount = reader.readInt();
             mMaxCount = reader.readInt();
             mName = reader.readString();
+            mOwner = reader.readSerializable(new User());
 
+            mUsers.clear();
+            while(reader.getPosition() < reader.getLength()) {
+                mUsers.add(reader.readSerializable(new User()));
+            }
         } catch(StreamCorruptedException e) {
             e.printStackTrace();
         }

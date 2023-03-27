@@ -5,20 +5,14 @@ import com.cclcgb.lso.api.LSOWriter;
 import com.cclcgb.lso.models.ILSOSerializable;
 import com.cclcgb.lso.models.User;
 
-public class Message implements ILSOSerializable {
+public class MessageReceivedMessage implements ILSOSerializable {
     private User mUser;
     private String mMessage;
 
-    public Message() {}
-
-    public Message(String message) {
-        mMessage = message;
-    }
+    public MessageReceivedMessage() {}
 
     @Override
-    public void Serialize(LSOWriter writer) {
-        writer.write(mMessage);
-    }
+    public void Serialize(LSOWriter writer) {}
 
     @Override
     public void Deserialize(LSOReader reader) {

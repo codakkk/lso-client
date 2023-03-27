@@ -19,6 +19,7 @@ import com.cclcgb.lso.api.Tags;
 import com.cclcgb.lso.api.messages.FirstConfigurationMessage;
 import com.cclcgb.lso.api.messages.SignInMessage;
 import com.cclcgb.lso.databinding.FragmentLoginBinding;
+import com.cclcgb.lso.models.User;
 
 import java.io.StreamCorruptedException;
 
@@ -61,14 +62,15 @@ public class LoginFragment extends Fragment {
             }
             else if(message.getTag() == Tags.SignInAcceptedTag) {
                 LSOReader reader = message.getReader();
-                try {
-                    int id = reader.readInt();
-                    APIManager.setUserId(id);
-                } catch (StreamCorruptedException e) {
-                    e.printStackTrace();
+                APIManager.setUser(reader.readSerializable(new User()));
+
+                View view = getView();
+
+                if(view != null) {
+                    NavDirections dir = LoginFragmentDirections.actionLoginFragmentToRoomsFragment();
+                    Navigation.findNavController(view).navigate(dir);
                 }
-                NavDirections dir = LoginFragmentDirections.actionLoginFragmentToRoomsFragment();
-                Navigation.findNavController(requireView()).navigate(dir);
+
             }
         }));
 
