@@ -44,7 +44,10 @@ public class ChatFragment extends Fragment implements ChatMessagesAdapter.IChatM
     private ChatMessagesAdapter mAdapter;
     private Room mRoom;
     private boolean mIsRoomClosed = false;
+
     private boolean mIsOwner = false;
+    private boolean mHasBeenAccepted = false;
+
 
     private final List<ChatMessage> mChatMessages = new ArrayList<>();
     private final Map<User, Color> mColors = new HashMap<>();
@@ -56,30 +59,28 @@ public class ChatFragment extends Fragment implements ChatMessagesAdapter.IChatM
 
         assert getArguments() != null;
         ChatFragmentArgs args = ChatFragmentArgs.fromBundle(getArguments());
+        mRoom = args.getRoom();
 
         mAdapter = new ChatMessagesAdapter(requireContext(), mChatMessages, this);
         mBinding.chatRecyclerView.setAdapter(mAdapter);
 
         APIManager.addMessageReceivedListener(this::onMessageReceived);
 
-        mRoom = RoomsFragment.getCurrentRoom();
-
         mBinding.roomName.setText(mRoom.getName());
         mBinding.sendButton.setOnClickListener(this::onSendButton);
         mBinding.backButton.setOnClickListener(this::onBackButton);
 
-        if(mRoom.getOwner().getId() != APIManager.getUser().getId()) {
+        mIsOwner = mRoom.getOwner().getId() == APIManager.getUser().getId();
+        mHasBeenAccepted = mIsOwner;
+
+        toggleMessageBoxVisibility(mIsOwner);
+
+        if(!mIsOwner) {
             publishMessage(ChatMessageType.Server, mRoom.getOwner(), "Waiting to be accepted by " + mRoom.getOwner().getName());
 
             JoinRoomRequestMessage joinRoomMessage = new JoinRoomRequestMessage(mRoom.getId());
             LSOMessage message = LSOMessage.Create(Tags.JoinRoomRequest, joinRoomMessage);
             APIManager.send(message);
-
-            mBinding.sendButton.setVisibility(View.INVISIBLE);
-            mBinding.inputMessage.setVisibility(View.INVISIBLE);
-        }
-        else {
-            mIsOwner = true;
         }
 
         return mBinding.getRoot();
@@ -103,9 +104,8 @@ public class ChatFragment extends Fragment implements ChatMessagesAdapter.IChatM
         if(message.getTag() == Tags.ReceiveMessage) {
             MessageReceivedMessage receivedMessage = reader.readSerializable(new MessageReceivedMessage());
 
-            final boolean isOwn = receivedMessage.getUser().getId() == APIManager.getUser().getId();
-
-            publishMessage(isOwn ? ChatMessageType.Sent : ChatMessageType.Received, receivedMessage.getUser(), receivedMessage.getMessage());
+            final boolean messageOwner = receivedMessage.getUser().getId() == APIManager.getUser().getId();
+            publishMessage(messageOwner ? ChatMessageType.Sent : ChatMessageType.Received, receivedMessage.getUser(), receivedMessage.getMessage());
         } else if(message.getTag() == Tags.LeaveRoom) {
             LeaveRoomMessage leaveRoomMessage = reader.readSerializable(new LeaveRoomMessage());
             publishMessage(ChatMessageType.Server, leaveRoomMessage.getUser(), leaveRoomMessage.getUser().getName() + " è uscito dalla chat.");
@@ -116,17 +116,18 @@ public class ChatFragment extends Fragment implements ChatMessagesAdapter.IChatM
 
             if(user.getId() == APIManager.getUser().getId()) {
                 publishMessage(ChatMessageType.Server, mRoom.getOwner(), String.format("%s ti ha accettato.", mRoom.getOwner().getName()));
+                mHasBeenAccepted = true;
+                toggleMessageBoxVisibility(true);
 
-                mBinding.sendButton.setVisibility(View.VISIBLE);
-                mBinding.inputMessage.setVisibility(View.VISIBLE);
             } else {
                 publishMessage(ChatMessageType.Server, user, String.format("%s è entrato nella chat.", user.getName()));
             }
         } else if(message.getTag() == Tags.RoomClosed) {
             publishMessage(ChatMessageType.Server, mRoom.getOwner(), mRoom.getOwner().getName() + " ha chiuso la stanza.");
+
             mIsRoomClosed = true;
-            mBinding.sendButton.setVisibility(View.INVISIBLE);
-            mBinding.inputMessage.setVisibility(View.INVISIBLE);
+
+            toggleMessageBoxVisibility(false);
         } else if(message.getTag() == Tags.JoinRoomRequested) {
             JoinRoomRequestedMessage joinRoomRequestMessage = reader.readSerializable(new JoinRoomRequestedMessage());
 
@@ -138,6 +139,10 @@ public class ChatFragment extends Fragment implements ChatMessagesAdapter.IChatM
 
 
     private void onSendButton(View view) {
+        if(!canSendMessage()) {
+            return;
+        }
+
         String data = mBinding.inputMessage.getText().toString();
         if(data.length() == 0) {
             return;
@@ -189,5 +194,16 @@ public class ChatFragment extends Fragment implements ChatMessagesAdapter.IChatM
 
         LSOMessage joinRefused = LSOMessage.Create(Tags.JoinRoomRefused, new JoinRoomRefuseRequestMessage(chatMessage.getUser().getId()));
         APIManager.send(joinRefused);
+    }
+
+    void toggleMessageBoxVisibility(boolean toggle) {
+        int visibility = toggle ? View.VISIBLE : View.GONE;
+
+        mBinding.cardView.setVisibility(visibility);
+        mBinding.sendButton.setVisibility(visibility);
+    }
+
+    boolean canSendMessage() {
+        return !mIsRoomClosed && mHasBeenAccepted;
     }
 }

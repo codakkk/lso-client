@@ -16,7 +16,6 @@
     </style>
 
     <style name="toolbar_title">
-        <item name="android:fontFamily">@font/poppins_medium</item>
         <item name="android:textSize">18sp</item>
     </style>
 </resources>

@@ -4,6 +4,7 @@ import android.os.StrictMode;
 import android.util.Log;
 
 import com.cclcgb.lso.activities.MainActivity;
+import com.cclcgb.lso.models.Room;
 import com.cclcgb.lso.models.User;
 
 import java.io.BufferedInputStream;

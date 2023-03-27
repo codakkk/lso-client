@@ -29,15 +29,12 @@
         android:id="@+id/chatFragment"
         android:name="com.cclcgb.lso.fragments.ChatFragment"
         android:label="ChatFragment" >
-        <argument
-            android:name="roomId"
-            app:argType="integer" />
         <action
             android:id="@+id/action_chatFragment_to_roomsFragment"
             app:destination="@id/roomsFragment" />
         <argument
-            android:name="roomName"
-            app:argType="string" />
+            android:name="room"
+            app:argType="com.cclcgb.lso.models.Room" />
     </fragment>
     <fragment
         android:id="@+id/signUpFragment"

@@ -1,22 +1,22 @@
 package com.cclcgb.lso.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
-
-import android.os.Handler;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.cclcgb.lso.adapters.RoomsAdapter;
 import com.cclcgb.lso.api.APIManager;
 import com.cclcgb.lso.api.LSOMessage;
 import com.cclcgb.lso.api.LSOReader;
@@ -27,21 +27,16 @@ import com.cclcgb.lso.api.messages.RoomCreateAccepted;
 import com.cclcgb.lso.databinding.FragmentRoomsBinding;
 import com.cclcgb.lso.models.Room;
 
-import com.cclcgb.lso.adapters.RoomsAdapter;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class RoomsFragment extends Fragment {
+public class RoomsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private FragmentRoomsBinding mBinding;
-    private Handler mHandler;
 
     private static final List<Room> mRooms = new ArrayList<>();
-    private static Room mCurrentRoom;
+
 
     private RoomsAdapter mRoomsAdapter;
-
-    private ProgressDialog mDialog;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -62,7 +57,7 @@ public class RoomsFragment extends Fragment {
             builder.setTitle("Crea chat");
 
             final EditText input = new EditText(ctx);
-            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            input.setInputType(InputType.TYPE_CLASS_TEXT);
             builder.setView(input);
 
             builder.setPositiveButton("Crea", (dialog, which) -> {
@@ -76,11 +71,13 @@ public class RoomsFragment extends Fragment {
             builder.show();
         });
 
+        mBinding.swipeRefreshLayout.setOnRefreshListener(this);
         // fetchRoomsPeriodically();
 
         return mBinding.getRoot();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void onMessageReceived(LSOMessage message) {
         short tag = message.getTag();
         LSOReader reader = message.getReader();
@@ -88,11 +85,10 @@ public class RoomsFragment extends Fragment {
         if(tag == Tags.RoomCreateAccepted) {
             RoomCreateAccepted roomCreateAccepted = reader.readSerializable(new RoomCreateAccepted());
             Room room = roomCreateAccepted.getRoom();
-            mCurrentRoom = room;
 
             View view = getView();
             if(view != null) {
-                NavDirections dir = RoomsFragmentDirections.actionRoomsFragmentToChatFragment(room.getId(), room.getName());
+                NavDirections dir = RoomsFragmentDirections.actionRoomsFragmentToChatFragment(room);
                 Navigation.findNavController(view).navigate(dir);
             }
         } else if(tag == Tags.RequestRoomsAccepted) {
@@ -101,40 +97,23 @@ public class RoomsFragment extends Fragment {
             mRooms.clear();
             mRooms.addAll(requestRoomsAccepted.getRooms());
 
-            mRoomsAdapter.notifyItemRangeChanged(0, mRooms.size());
+            mRoomsAdapter.notifyDataSetChanged();
+
+            mBinding.swipeRefreshLayout.setRefreshing(false);
         }
     }
 
     private void onRoomClicked(Room room) {
-        mCurrentRoom = room;
-
         View view = getView();
         if(view != null) {
-            NavDirections dir = RoomsFragmentDirections.actionRoomsFragmentToChatFragment(room.getId(), room.getName());
+            NavDirections dir = RoomsFragmentDirections.actionRoomsFragmentToChatFragment(room);
             Navigation.findNavController(view).navigate(dir);
         }
     }
 
-    private void fetchRoomsPeriodically() {
-
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(10000);
-
-                    LSOMessage requestRooms = LSOMessage.CreateEmpty(Tags.RequestRooms);
-                    APIManager.send(requestRooms);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
-
-    public static List<Room> getRooms() {
-        return mRooms;
-    }
-    public static Room getCurrentRoom() {
-        return mCurrentRoom;
+    @Override
+    public void onRefresh() {
+        LSOMessage requestRooms = LSOMessage.CreateEmpty(Tags.RequestRooms);
+        APIManager.send(requestRooms);
     }
 }
