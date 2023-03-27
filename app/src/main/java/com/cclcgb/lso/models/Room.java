@@ -50,10 +50,6 @@ public class Room implements ILSOSerializable, Parcelable {
         return mId;
     }
 
-    public void setCount(int count) {
-        this.mCount = count;
-    }
-
     public int getCount() {
         return mCount;
     }
